@@ -1,0 +1,8 @@
+aab
+anki
+coverage[toml]
+mypy
+pre-commit
+pytest
+tox
+types-beautifulsoup4
