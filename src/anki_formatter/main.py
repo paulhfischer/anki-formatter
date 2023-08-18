@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
-import tempfile
 from collections.abc import Callable
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -14,8 +12,6 @@ from aqt.browser import Browser
 from aqt.utils import showInfo
 
 from anki_formatter.formatters import FORMATTERS
-
-REPOSITORY_URL = "https://www.github.com/paulhfischer/anki-templates"
 
 
 def _load_config(directory: str) -> dict[str, dict[str, Callable[[str], str]]]:
@@ -41,11 +37,14 @@ def _load_config(directory: str) -> dict[str, dict[str, Callable[[str], str]]]:
 
 
 @contextmanager
-def _clone_repository(url: str) -> Generator[str, None, None]:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        subprocess.check_call(("git", "clone", url, tmpdir))
+def _template_directory() -> Generator[str, None, None]:
+    addons_path = mw.addonManager.addonsFolder()
+    userfiles_path = os.path.join(addons_path, "user_files")
+    templates_path = os.path.join(userfiles_path, "templates")
 
-        yield tmpdir
+    os.makedirs(templates_path, exist_ok=True)
+
+    yield templates_path
 
 
 def _selected_notes(browser: Browser) -> Generator[Note, None, None]:
@@ -81,7 +80,7 @@ def main(browser: Browser) -> None:
     mw.checkpoint("Format Notes")
     mw.progress.start()
 
-    with _clone_repository(REPOSITORY_URL) as models_dir:
+    with _template_directory() as models_dir:
         config = _load_config(models_dir)
 
     formatted_notes = []
