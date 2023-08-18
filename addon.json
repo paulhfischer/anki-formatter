@@ -1,0 +1,9 @@
+{
+  "display_name": "AnkiFormatter",
+  "module_name": "anki_formatter",
+  "repo_name": "anki-formatter",
+  "ankiweb_id": "n/a",
+  "author": "Paul Fischer",
+  "conflicts": [],
+  "targets": ["anki21"]
+}
