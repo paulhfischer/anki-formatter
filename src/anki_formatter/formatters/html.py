@@ -22,7 +22,6 @@ def _strip_whitespace_between_tags(text: str) -> str:
 
 def preprocess(text: str) -> str:
     text = fix_encoding(text)
-    text = replace_symbols(text)
 
     # preserve whitespace after subscript and superscript
     text = text.replace("</sub> ", "</sub>☷").replace("</sup> ", "</sup>☷")
@@ -221,6 +220,8 @@ class HTMLParser(PythonHTMLParser):
             self.__append_to_line(f"{self.__indent}</{tag}>")
 
     def handle_data(self, data: str) -> None:
+        data = replace_symbols(data)
+
         if data.startswith(tuple(self.NO_WHITESPACE_BEFORE)):
             self.__line = self.__line.rstrip(self.RSTRIP_CHARS)
 
