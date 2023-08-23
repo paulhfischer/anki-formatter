@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 
 if "pytest" not in sys.modules:
-    from anki.hooks import addHook
+    from aqt import gui_hooks
     from aqt.browser import Browser
 
     from anki_formatter.main import main
@@ -12,4 +12,4 @@ if "pytest" not in sys.modules:
         format_action = browser.form.menuEdit.addAction("Format Notes")
         format_action.triggered.connect(lambda _, b=browser: main(b))
 
-    addHook("browser.setupMenus", setup_menu)
+    gui_hooks.browser_menus_did_init.append(setup_menu)
