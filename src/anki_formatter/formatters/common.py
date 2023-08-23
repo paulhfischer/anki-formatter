@@ -14,4 +14,8 @@ def replace_symbols(text: str) -> str:
         .replace("=&gt;", "⇒")
         .replace("&lt;=", "⇐")
         .replace("&nbsp;", " ")
+        .replace("“", '"')
+        .replace("”", '"')
+        .replace("„", '"')
+        .replace("‟", '"')
     )
