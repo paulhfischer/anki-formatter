@@ -9,12 +9,13 @@ from contextlib import contextmanager
 from anki.notes import Note
 from aqt import mw
 from aqt.browser import Browser
+from aqt.utils import showCritical
 from aqt.utils import showInfo
 
 from anki_formatter.formatters import FORMATTERS
 
 
-def _load_config(directory: str) -> dict[str, dict[str, Callable[[str], str]]]:
+def _load_config(directory: str) -> dict[str, dict[str, Callable[[str], tuple[str, bool]]]]:
     config = {}
 
     for folder_name in os.listdir(directory):
@@ -57,17 +58,24 @@ def _note_fields(note: Note) -> Generator[str, None, None]:
         yield field["name"]
 
 
-def _format_note(note: Note, config: dict[str, dict[str, Callable[[str], str]]]) -> Note | None:
+def _format_note(
+    note: Note,
+    config: dict[str, dict[str, Callable[[str], tuple[str, bool]]]],
+) -> Note | None:
     changed = False
 
     for field in _note_fields(note):
         formatter = config[note.note_type()["name"]][field]
 
         original = note[field]
-        formatted = formatter(original)
+        try:
+            formatted_value, did_format = formatter(original)
+        except Exception as e:
+            showCritical(f"Could not format note {dict(note)}!")
+            raise e
 
-        if original != formatted:
-            note[field] = formatted
+        if did_format:
+            note[field] = formatted_value
             changed = True
 
     if changed:

@@ -4,6 +4,7 @@ import pytest
 
 from anki_formatter.formatters.clear import clear
 from anki_formatter.formatters.html import format_html
+from anki_formatter.formatters.image_occlusion_svg import format_image_occlusion_svg
 from anki_formatter.formatters.plaintext import convert_to_plaintext
 from anki_formatter.formatters.skip import skip
 
@@ -13,7 +14,7 @@ from anki_formatter.formatters.skip import skip
     (("foobar", ""),),
 )
 def test_clear_formatter(input: str, expected_output: str) -> None:
-    ret = clear(input)
+    ret, _ = clear(input)
 
     assert ret == expected_output
 
@@ -27,7 +28,7 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
-    ret = convert_to_plaintext(input)
+    ret, _ = convert_to_plaintext(input)
 
     assert ret == expected_output
 
@@ -40,7 +41,7 @@ def test_plaintext_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_skip_formatter(input: str, expected_output: str) -> None:
-    ret = skip(input)
+    ret, _ = skip(input)
 
     assert ret == expected_output
 
@@ -98,6 +99,231 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
-    ret = format_html(input)
+    ret, _ = format_html(input)
+
+    assert ret == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        # masks: reorder and strip attributes
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+ </g>
+ <g>
+  <title>Masks</title>
+  <rect fill="#FFEBA2" stroke="#2D2D2D" x="167" y="209" width="260" height="135" id="628be4152337460db5e8d5e58c13425a-ao-1" stroke-linecap="null"/>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='167' y='209' width='260' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # masks: round dimensions
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+ </g>
+ <g>
+  <title>Masks</title>
+  <rect id="628be4152337460db5e8d5e58c13425a-ao-1" x="-2" y="1370" width="260.7" height="135.3" fill="#FFEBA2" stroke="#2D2D2D" stroke-width="1"/>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='0.5' y='1364.5' width='261' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # masks: respect active state
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+ </g>
+ <g>
+  <title>Masks</title>
+  <rect id="628be4152337460db5e8d5e58c13425a-ao-1" x="167" y="209" width="260" height="135" fill="#FF7E7E" stroke="#2D2D2D" stroke-width="1" class="qshape"/>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='167' y='209' width='260' height='135' fill='#FF7E7E' stroke='#2D2D2D' stroke-width='1' class='qshape'/>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # masks: sort
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+ </g>
+ <g>
+  <title>Masks</title>
+  <rect id="628be4152337460db5e8d5e58c13425a-ao-2" x="29" y="1067" width="260" height="135" fill="#FFEBA2" stroke="#2D2D2D" stroke-width="1"/>
+  <rect id="628be4152337460db5e8d5e58c13425a-ao-1" x="167" y="209" width="260" height="135" fill="#FFEBA2" stroke="#2D2D2D" stroke-width="1"/>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='167' y='209' width='260' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-2' x='29' y='1067' width='260' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # masks: groups
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+ </g>
+ <g>
+  <title>Masks</title>
+  <g id="628be4152337460db5e8d5e58c13425a-ao-1">
+    <rect x="29" y="1067" width="260" height="135" fill="#FFEBA2" stroke="#2D2D2D" stroke-width="1"/>
+    <rect x="167" y="209" width="260" height="135" fill="#FFEBA2" stroke="#2D2D2D" stroke-width="1"/>
+  </g>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+    <g id='628be4152337460db5e8d5e58c13425a-ao-1'>
+      <rect x='29' y='1067' width='260' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+      <rect x='167' y='209' width='260' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+    </g>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # labels: reorder and strip attributes
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+  <text xml:space="preserve" text-anchor="middle" font-family="'Arial', 'Helvetica LT Std', Arial, sans-serif" font-size="24" y="110" x="400" fill="#000000">foobar</text>
+ </g>
+ <g>
+  <title>Masks</title>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+    <text x='400' y='110' text-anchor='middle' font-family='Arial' font-size='24' fill='#000000'>foobar</text>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # labels: round dimensions
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+  <text x="400.3" y="110.7" text-anchor="middle" font-family="Arial" font-size="24" fill="#000000">foobar</text>
+ </g>
+ <g>
+  <title>Masks</title>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+    <text x='400' y='111' text-anchor='middle' font-family='Arial' font-size='24' fill='#000000'>foobar</text>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+        # labels: groups
+        (
+            """\
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="1500">
+ <!-- Created with Image Occlusion Enhanced -->
+ <g>
+  <title>Labels</title>
+  <g>
+    <text x="400" y="110" text-anchor="middle" font-family="Arial" font-size="24" fill="#000000">foo</text>
+    <text x="200" y="60" text-anchor="middle" font-family="Arial" font-size="24" fill="#000000">bar</text>
+  </g>
+ </g>
+ <g>
+  <title>Masks</title>
+ </g>
+</svg>""",  # noqa: E501
+            """\
+<svg width='500' height='1500' xmlns='http://www.w3.org/2000/svg'>
+  <!-- Created with Image Occlusion Enhanced -->
+  <g id='labels'>
+    <title>Labels</title>
+    <g>
+      <text x='400' y='110' text-anchor='middle' font-family='Arial' font-size='24' fill='#000000'>foo</text>
+      <text x='200' y='60' text-anchor='middle' font-family='Arial' font-size='24' fill='#000000'>bar</text>
+    </g>
+  </g>
+  <g id='masks'>
+    <title>Masks</title>
+  </g>
+</svg>""",  # noqa: E501
+        ),
+    ),
+)
+def test_image_occlusion_svg_formatter(input: str, expected_output: str) -> None:
+    ret = format_image_occlusion_svg(input)
 
     assert ret == expected_output

@@ -1,0 +1,11 @@
+{
+  "imageOcclusionSVG": {
+    "backgroundActive": "#FF7E7E",
+    "backgroundInactive": "#FFEBA2",
+    "stroke": {
+      "active": false,
+      "color": "#2D2D2D",
+      "width": 2
+    }
+  }
+}
