@@ -9,15 +9,9 @@ from bs4 import BeautifulSoup
 
 from anki_formatter.formatters.common import fix_encoding
 from anki_formatter.formatters.common import replace_symbols
+from anki_formatter.formatters.common import strip_whitespace_between_tags
 
 ALLOWED_TAGS = {"section", "ul", "ol", "li", "b", "sub", "sup", "br", "img", "anki-mathjax"}
-
-
-def _strip_whitespace_between_tags(text: str) -> str:
-    def __strip(input: re.Match[str]) -> str:
-        return input.group().strip()
-
-    return re.sub(r">\s+|\s+<", __strip, text)
 
 
 def preprocess(text: str) -> str:
@@ -41,7 +35,7 @@ def preprocess(text: str) -> str:
     soup.smooth()
     text = soup.prettify()
 
-    text = _strip_whitespace_between_tags(text)
+    text = strip_whitespace_between_tags(text)
     text = text.replace("\n", " ")
     text = text.strip()
 
@@ -237,13 +231,13 @@ class HTMLParser(PythonHTMLParser):
         return "\n".join(line.rstrip(self.RSTRIP_CHARS) for line in self.__lines if line)
 
 
-def format_html(html: str) -> str:
-    html = preprocess(html)
+def format_html(html: str) -> tuple[str, bool]:
+    formatted_html = preprocess(html)
 
     parser = HTMLParser()
-    parser.feed(html)
-    html = parser.get_parsed_string()
+    parser.feed(formatted_html)
+    formatted_html = parser.get_parsed_string()
 
-    html = postprocess(html)
+    formatted_html = postprocess(formatted_html)
 
-    return html
+    return formatted_html, html != formatted_html
