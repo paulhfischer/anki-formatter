@@ -8,7 +8,7 @@ from anki_formatter.formatters.common import fix_encoding
 from anki_formatter.formatters.common import replace_symbols
 
 
-def convert_to_plaintext(value: str) -> str:
+def convert_to_plaintext(value: str) -> tuple[str, bool]:
     value = fix_encoding(value)
     value = replace_symbols(value)
     value = value.strip()
@@ -17,4 +17,6 @@ def convert_to_plaintext(value: str) -> str:
         warnings.simplefilter("ignore")
         soup = BeautifulSoup(value, "html.parser")
 
-    return soup.get_text().strip()
+    formatted_value = soup.get_text().strip()
+
+    return formatted_value, value != formatted_value
