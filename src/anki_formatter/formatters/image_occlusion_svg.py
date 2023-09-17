@@ -51,43 +51,10 @@ def _title_tag(title: str) -> Tag:
     return element
 
 
-class LabelGroup(NamedTuple):
-    id: str | None
+def _getattr(obj: object, attribute: str, default: str) -> str:
+    value = getattr(obj, attribute, default)
 
-    title: str | None
-
-    labels: list[Label | LabelGroup]
-
-    @classmethod
-    def from_tag(cls, tag: Tag, main_group: bool = False) -> LabelGroup:
-        labels: list[Label | LabelGroup] = []
-
-        for child in get_child_tags(tag):
-            if child.name == "title":
-                continue
-            elif child.name == "text":
-                labels.append(Label.from_tag(child))
-            elif child.name == "g":
-                labels.append(LabelGroup.from_tag(child))
-            else:
-                raise NotImplementedError  # pragma: no cover
-
-        return LabelGroup(
-            id="labels" if main_group else None,
-            title="Labels" if main_group else None,
-            labels=labels,
-        )
-
-    def to_tag(self) -> Tag:
-        group_element = Tag(name="g", attrs=attrs({"id": self.id}))
-
-        if self.title:
-            group_element.append(_title_tag(self.title))
-
-        for label in self.labels:
-            group_element.append(label.to_tag())
-
-        return group_element
+    return value if value else default
 
 
 class Label(NamedTuple):
@@ -128,60 +95,6 @@ class Label(NamedTuple):
         element.string = self.text
 
         return element
-
-
-class MaskGroup(NamedTuple):
-    id: str | None
-
-    title: str | None
-
-    active: bool
-
-    masks: list[Mask | MaskGroup]
-
-    @classmethod
-    def from_tag(
-        cls,
-        tag: Tag,
-        svg_width: int | float,
-        svg_height: int | float,
-        main_group: bool = False,
-    ) -> MaskGroup:
-        masks: list[Mask | MaskGroup] = []
-
-        for child in get_child_tags(tag):
-            if child.name == "title":
-                continue
-            elif child.name == "rect":
-                masks.append(Mask.from_tag(child, svg_width=svg_width, svg_height=svg_height))
-            elif child.name == "g":
-                masks.append(MaskGroup.from_tag(child, svg_width=svg_width, svg_height=svg_height))
-            else:
-                raise NotImplementedError  # pragma: no cover
-
-        return MaskGroup(
-            id="masks" if main_group else tag.attrs.get("id"),
-            title="Masks" if main_group else None,
-            active="qshape" in get_classes(tag),
-            masks=masks,
-        )
-
-    def to_tag(self) -> Tag:
-        group_element = Tag(
-            name="g",
-            attrs=attrs({"id": self.id, "class": "qshape" if self.active else None}),
-        )
-
-        if self.title:
-            group_element.append(_title_tag(self.title))
-
-        for mask in sorted(
-            self.masks,
-            key=lambda mask: int(mask.id.split("-")[2]) if mask.id else 0,
-        ):
-            group_element.append(mask.to_tag())
-
-        return group_element
 
 
 class Mask(NamedTuple):
@@ -239,9 +152,65 @@ class Mask(NamedTuple):
         )
 
 
+class Group(NamedTuple):
+    id: str | None
+
+    title: str | None
+
+    active: bool
+
+    children: list[Mask | Label | Group]
+
+    @classmethod
+    def from_tag(
+        cls,
+        tag: Tag,
+        svg_width: int | float,
+        svg_height: int | float,
+        name: str | None = None,
+    ) -> Group:
+        children: list[Mask | Label | Group] = []
+
+        for child in get_child_tags(tag):
+            if child.name == "title":
+                continue
+            elif child.name == "rect":
+                children.append(Mask.from_tag(child, svg_width=svg_width, svg_height=svg_height))
+            elif child.name == "text":
+                children.append(Label.from_tag(child))
+            elif child.name == "g":
+                children.append(Group.from_tag(child, svg_width=svg_width, svg_height=svg_height))
+            else:
+                raise NotImplementedError  # pragma: no cover
+
+        return Group(
+            id=name.lower() if name else tag.attrs.get("id"),
+            title=name if name else None,
+            active="qshape" in get_classes(tag),
+            children=children,
+        )
+
+    def to_tag(self) -> Tag:
+        group_element = Tag(
+            name="g",
+            attrs=attrs({"id": self.id, "class": "qshape" if self.active else None}),
+        )
+
+        if self.title:
+            group_element.append(_title_tag(self.title))
+
+        for child in sorted(
+            self.children,
+            key=lambda child: int(_getattr(child, "id", "0").split("-")[-1]),
+        ):
+            group_element.append(child.to_tag())
+
+        return group_element
+
+
 class SVG(NamedTuple):
-    labels: LabelGroup
-    masks: MaskGroup
+    labels: Group
+    masks: Group
 
     width: int | float
     height: int | float
@@ -255,14 +224,19 @@ class SVG(NamedTuple):
             if child.name == "g":
                 if child.title:
                     if child.title.text == "Masks":
-                        masks = MaskGroup.from_tag(
+                        masks = Group.from_tag(
                             child,
                             svg_width=width,
                             svg_height=height,
-                            main_group=True,
+                            name="Masks",
                         )
                     elif child.title.text == "Labels":
-                        labels = LabelGroup.from_tag(child, main_group=True)
+                        labels = Group.from_tag(
+                            child,
+                            svg_width=width,
+                            svg_height=height,
+                            name="Labels",
+                        )
                     else:
                         raise NotImplementedError  # pragma: no cover
                 else:
