@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from html import escape
 from html.parser import HTMLParser as PythonHTMLParser
@@ -55,6 +56,10 @@ def _getattr(obj: object, attribute: str, default: str) -> str:
     value = getattr(obj, attribute, default)
 
     return value if value else default
+
+
+def _natural_sort(item: str) -> list[int | str]:
+    return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", item)]
 
 
 class Label(NamedTuple):
@@ -201,7 +206,7 @@ class Group(NamedTuple):
 
         for child in sorted(
             self.children,
-            key=lambda child: int(_getattr(child, "id", "0").split("-")[-1]),
+            key=lambda child: _natural_sort(_getattr(child, "id", "0")),
         ):
             group_element.append(child.to_tag())
 
