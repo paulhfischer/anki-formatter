@@ -32,6 +32,15 @@ def preprocess(text: str) -> str:
         if tag.name not in ALLOWED_TAGS:
             tag.unwrap()
 
+    # remove empty tags
+    for tag in soup.find_all():
+        if (
+            len(tag.get_text(strip=True)) == 0
+            and len([content for content in tag.contents if content != "\n"]) == 0
+            and tag.name not in {"br", "img"}
+        ):
+            tag.extract()
+
     soup.smooth()
     text = soup.prettify()
 
