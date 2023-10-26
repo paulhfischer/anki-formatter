@@ -96,6 +96,8 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
         ("„foo“", '"foo"'),
         ("<img src='„foo“'>", "<img src='„foo“'>"),
         ("<li>„foo“</li>", '<li>"foo"</li>'),
+        ("<li>foo</li><li></li>", "<li>foo</li>"),
+        ("<ul>\n  <li>foo</li>\n  <li>\n    \n  </li>\n</ul>", "<ul>\n  <li>foo</li>\n</ul>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
