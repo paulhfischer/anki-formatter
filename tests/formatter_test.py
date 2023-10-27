@@ -25,6 +25,7 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
         ("foobar", "foobar"),
         ("<b>foo</b> bar", "foo bar"),
         ("<b>foo</b>bar", "foobar"),
+        ("foo&nbsp;bar", "foo bar"),
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
@@ -98,6 +99,7 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
         ("<li>„foo“</li>", '<li>"foo"</li>'),
         ("<li>foo</li><li></li>", "<li>foo</li>"),
         ("<ul>\n  <li>foo</li>\n  <li>\n    \n  </li>\n</ul>", "<ul>\n  <li>foo</li>\n</ul>"),
+        ("<li>foo =&gt; foo&nbsp;bar</li>", "<li>foo ⇒ foo bar</li>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
