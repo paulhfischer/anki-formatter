@@ -9,14 +9,13 @@ from anki_formatter.formatters.common import replace_symbols
 
 
 def convert_to_plaintext(value: str) -> tuple[str, bool]:
-    value = fix_encoding(value)
-    value = replace_symbols(value)
-    value = value.strip()
+    formatted_value = fix_encoding(value)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         soup = BeautifulSoup(value, "html.parser")
 
     formatted_value = soup.get_text().strip()
+    formatted_value = replace_symbols(formatted_value)
 
     return formatted_value, value != formatted_value
