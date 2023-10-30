@@ -20,8 +20,17 @@ def preprocess(text: str) -> str:
     # preserve whitespace after subscript and superscript
     text = text.replace("</sub> ", "</sub>☷").replace("</sup> ", "</sup>☷")
 
-    # preserve whitespace between b-tags
-    text = re.sub(r"</b>(?: )+<b>", "</b>☰<b>", text)
+    # move whitespace out of b-tags
+    text = text.replace(" </b>", "</b> ")
+    text = text.replace("<b> ", " <b>")
+
+    # preserve whitespace before and after b-tags
+    text = re.sub(r"</b>(?: \n*)+<b>", "</b>☰<b>", text)
+    text = text.replace("</b> ", "</b>☷")
+    text = text.replace(" <b>", "☷<b>")
+    text = re.sub(r"☷+", "☷", text)
+    text = re.sub(r"☰+", "☰", text)
+    text = re.sub(r"☷☰", "☰", text)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -58,8 +67,11 @@ def postprocess(text: str) -> str:
     # undo preserve whitespace after subscript and superscript
     text = text.replace("</sub>☷", "</sub> ").replace("</sup>☷", "</sup> ")
 
-    # undo preserve whitespace between b-tags
+    # undo preserve whitespace before and after b-tags
+    text = re.sub(r"</b> *", "</b>", text)
     text = text.replace("</b>☰<b>", "</b> <b>")
+    text = text.replace("</b>☷", "</b> ")
+    text = text.replace("☷<b>", " <b>")
 
     # remove br at end of li-items
     text = re.sub(r"(?:<br>)+</li>", "</li>", text)
@@ -193,8 +205,6 @@ class HTMLParser(PythonHTMLParser):
                 self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(attrs)}>")
                 self.__tag = tag
             else:
-                self.__append_to_line(" ")
-
                 if self.__strip_line(tag=tag):
                     self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(attrs)}>")
                 else:
@@ -225,14 +235,20 @@ class HTMLParser(PythonHTMLParser):
     def handle_data(self, data: str) -> None:
         data = replace_symbols(data)
 
+        if data.startswith(("☷", "☰")) and data[1:].startswith(tuple(self.NO_WHITESPACE_BEFORE)):
+            data = data[1:]
+
         if data.startswith(tuple(self.NO_WHITESPACE_BEFORE)):
             self.__line = self.__line.rstrip(self.RSTRIP_CHARS)
 
         if not self.__tag or self.__tag in self.NO_BREAK_TAGS:
-            self.__line += data
+            if not self.__line:
+                self.__line += data.lstrip("☷☰")
+            else:
+                self.__line += data
         else:
-            self.__lines += [self.__line]
-            self.__line = f"{self.__indent}{data}"
+            self.__next_line()
+            self.__line = f"{self.__indent}{data.lstrip('☷☰')}"
 
     def get_parsed_string(self) -> str:
         self.__lines += [self.__line]
