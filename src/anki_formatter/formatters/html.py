@@ -18,16 +18,18 @@ def preprocess(text: str) -> str:
     text = fix_encoding(text)
 
     # preserve whitespace after subscript and superscript
-    text = text.replace("</sub> ", "</sub>☷").replace("</sup> ", "</sup>☷")
+    text = text.replace("</sub> ", "</sub>☷").replace("</sub>&nbsp;", "</sub>☷")
+    text = text.replace("</sup> ", "</sup>☷").replace("</sup>&nbsp;", "</sup>☷")
 
     # move whitespace out of b-tags
-    text = text.replace(" </b>", "</b> ")
-    text = text.replace("<b> ", " <b>")
+    text = text.replace(" </b>", "</b> ").replace("&nbsp;</b>", "</b> ")
+    text = text.replace("<b> ", " <b>").replace("<b>&nbsp;", " <b>")
 
     # preserve whitespace before and after b-tags
     text = re.sub(r"</b>(?: \n*)+<b>", "</b>☰<b>", text)
-    text = text.replace("</b> ", "</b>☷")
-    text = text.replace(" <b>", "☷<b>")
+    text = re.sub(r"</b>(?:&nbsp;\n*)+<b>", "</b>☰<b>", text)
+    text = text.replace("</b> ", "</b>☷").replace("</b>&nbsp;", "</b>☷")
+    text = text.replace(" <b>", "☷<b>").replace("&nbsp;<b>", "☷<b>")
     text = re.sub(r"☷+", "☷", text)
     text = re.sub(r"☰+", "☰", text)
     text = re.sub(r"☷☰", "☰", text)
