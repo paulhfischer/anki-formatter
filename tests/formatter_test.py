@@ -113,6 +113,9 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
         ("foo<br> <b>bar</b>", "foo<br>\n<b>bar</b>"),
         ("<section>foo<br><b>bar</b></section>", "<section>\n  foo<br>\n  <b>bar</b>\n</section>"),
         ("<section>foo<br> <b>bar</b></section>", "<section>\n  foo<br>\n  <b>bar</b>\n</section>"),
+        ("foo&nbsp;<b>bar</b>", "foo <b>bar</b>"),
+        ("foo<b>&nbsp;bar</b>", "foo <b>bar</b>"),
+        ("foo<sub>bar</sub>&nbsp;foo", "foo<sub>bar</sub> foo"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
