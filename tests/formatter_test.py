@@ -5,6 +5,7 @@ import pytest
 from anki_formatter.formatters.clear import clear
 from anki_formatter.formatters.html import format_html
 from anki_formatter.formatters.image_occlusion_svg import format_image_occlusion_svg
+from anki_formatter.formatters.occlusion import format_occlusion
 from anki_formatter.formatters.plaintext import convert_to_plaintext
 from anki_formatter.formatters.skip import skip
 
@@ -43,6 +44,19 @@ def test_plaintext_formatter(input: str, expected_output: str) -> None:
 )
 def test_skip_formatter(input: str, expected_output: str) -> None:
     ret, _ = skip(input)
+
+    assert ret == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        ("{{c1::foo}} {{c2::bar}}", "{{c1::foo}}{{c2::bar}}"),
+        ("{{c2::bar}}{{c1::foo}}", "{{c1::foo}}{{c2::bar}}"),
+    ),
+)
+def test_occlusion_formatter(input: str, expected_output: str) -> None:
+    ret, _ = format_occlusion(input)
 
     assert ret == expected_output
 
