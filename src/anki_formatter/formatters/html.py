@@ -11,11 +11,11 @@ from anki_formatter.formatters.common import fix_encoding
 from anki_formatter.formatters.common import replace_symbols
 from anki_formatter.formatters.common import strip_whitespace_between_tags
 
-ALLOWED_TAGS = {"section", "ul", "ol", "li", "b", "sub", "sup", "br", "img", "anki-mathjax"}
+ALLOWED_TAGS = {"section", "ul", "ol", "li", "b", "i", "sub", "sup", "br", "img", "anki-mathjax"}
 
 
 def _preserve_whitespace(text: str) -> str:
-    for tag in ("b", "sub", "sup"):
+    for tag in ("b", "i", "sub", "sup"):
         # move whitespace out of tag
         text = text.replace(f" </{tag}>", f"</{tag}> ").replace(f"&nbsp;</{tag}>", f"</{tag}> ")
         text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
@@ -68,7 +68,7 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
-    for tag in ("b", "sub", "sup"):
+    for tag in ("b", "i", "sub", "sup"):
         # remove unwanted whitespace between tags and merge them
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
 
@@ -94,6 +94,7 @@ class HTMLParser(PythonHTMLParser):
         self.ALLOWED_TAGS = ALLOWED_TAGS  # all other tags will be removed
         self.INLINE_TAGS = {
             "b",
+            "i",
             "sub",
             "sup",
             "anki-mathjax",
