@@ -14,25 +14,30 @@ from anki_formatter.formatters.common import strip_whitespace_between_tags
 ALLOWED_TAGS = {"section", "ul", "ol", "li", "b", "sub", "sup", "br", "img", "anki-mathjax"}
 
 
-def preprocess(text: str) -> str:
-    text = fix_encoding(text)
+def _preserve_whitespace(text: str) -> str:
+    for tag in ("b", "sub", "sup"):
+        # move whitespace out of tag
+        text = text.replace(f" </{tag}>", f"</{tag}> ").replace(f"&nbsp;</{tag}>", f"</{tag}> ")
+        text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
 
-    # preserve whitespace after subscript and superscript
-    text = text.replace("</sub> ", "</sub>☷").replace("</sub>&nbsp;", "</sub>☷")
-    text = text.replace("</sup> ", "</sup>☷").replace("</sup>&nbsp;", "</sup>☷")
+        # preserve whitespace before and after formatting-tags
+        text = re.sub(rf"</{tag}>(?: \n*)+<{tag}>", f"</{tag}>☰<{tag}>", text)
+        text = re.sub(rf"</{tag}>(?:&nbsp;\n*)+<{tag}>", f"</{tag}>☰<{tag}>", text)
+        text = text.replace(f"</{tag}> ", f"</{tag}>☷").replace(f"</{tag}>&nbsp;", f"</{tag}>☷")
+        text = text.replace(f" <{tag}>", f"☷<{tag}>").replace(f"&nbsp;<{tag}>", f"☷<{tag}>")
 
-    # move whitespace out of b-tags
-    text = text.replace(" </b>", "</b> ").replace("&nbsp;</b>", "</b> ")
-    text = text.replace("<b> ", " <b>").replace("<b>&nbsp;", " <b>")
-
-    # preserve whitespace before and after b-tags
-    text = re.sub(r"</b>(?: \n*)+<b>", "</b>☰<b>", text)
-    text = re.sub(r"</b>(?:&nbsp;\n*)+<b>", "</b>☰<b>", text)
-    text = text.replace("</b> ", "</b>☷").replace("</b>&nbsp;", "</b>☷")
-    text = text.replace(" <b>", "☷<b>").replace("&nbsp;<b>", "☷<b>")
+    # merge preserved whitspace
     text = re.sub(r"☷+", "☷", text)
     text = re.sub(r"☰+", "☰", text)
     text = re.sub(r"☷☰", "☰", text)
+
+    return text
+
+
+def preprocess(text: str) -> str:
+    text = fix_encoding(text)
+
+    text = _preserve_whitespace(text)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -63,17 +68,15 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
-    # remove unwanted whitespace between b-tags and merge them
-    text = re.sub("</b>(?: )*<b>", "", text)
+    for tag in ("b", "sub", "sup"):
+        # remove unwanted whitespace between tags and merge them
+        text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
 
-    # undo preserve whitespace after subscript and superscript
-    text = text.replace("</sub>☷", "</sub> ").replace("</sup>☷", "</sup> ")
-
-    # undo preserve whitespace before and after b-tags
-    text = re.sub(r"</b> *", "</b>", text)
-    text = text.replace("</b>☰<b>", "</b> <b>")
-    text = text.replace("</b>☷", "</b> ")
-    text = text.replace("☷<b>", " <b>")
+        # undo preserve whitespace before and after formatting-tags
+        text = re.sub(rf"</{tag}> *", f"</{tag}>", text)
+        text = text.replace(f"</{tag}>☰<{tag}>", f"</{tag}> <{tag}>")
+        text = text.replace(f"</{tag}>☷", f"</{tag}> ")
+        text = text.replace(f"☷<{tag}>", f" <{tag}>")
 
     # remove br at end of li-items
     text = re.sub(r"(?:<br>)+</li>", "</li>", text)
