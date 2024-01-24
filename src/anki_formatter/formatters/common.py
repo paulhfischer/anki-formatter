@@ -9,7 +9,12 @@ from bs4 import Tag
 
 
 def fix_encoding(text: str) -> str:
-    return text.encode("utf-8", errors="ignore").decode("utf-8").replace("\ufeff", "")
+    return (
+        text.encode("utf-8", errors="ignore")
+        .decode("utf-8")
+        .replace("\ufeff", "")
+        .replace("\u00ad", "")
+    )
 
 
 def replace_symbols(text: str) -> str:
