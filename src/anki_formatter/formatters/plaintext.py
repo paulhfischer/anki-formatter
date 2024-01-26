@@ -13,7 +13,7 @@ def convert_to_plaintext(value: str) -> tuple[str, bool]:
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        soup = BeautifulSoup(value, "html.parser")
+        soup = BeautifulSoup(formatted_value, "html.parser")
 
     formatted_value = soup.get_text().strip()
     formatted_value = replace_symbols(formatted_value)
