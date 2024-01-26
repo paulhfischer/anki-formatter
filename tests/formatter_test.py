@@ -27,6 +27,7 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
         ("<b>foo</b> bar", "foo bar"),
         ("<b>foo</b>bar", "foobar"),
         ("foo&nbsp;bar", "foo bar"),
+        ("foo\u00adbar", "foobar"),
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
