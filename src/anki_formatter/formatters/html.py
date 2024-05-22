@@ -139,7 +139,7 @@ class HTMLParser(PythonHTMLParser):
             "☰",
         }  # whitespace after of these strings will be removed
 
-        self.ALLOWED_ATTRS = {"src"}  # all other attrs will be removed
+        self.ALLOWED_ATTRS = {("img", "src"), ("ol", "start")}  # all other attrs will be removed
         self.RSTRIP_CHARS = (
             " ☷"  # these characters will be treated as whitespace and stripped if needed
         )
@@ -149,11 +149,11 @@ class HTMLParser(PythonHTMLParser):
         self.__tag = ""
         self.__lines: list[str] = []
 
-    def __attrs_str(self, attrs: list[tuple[str, str | None]]) -> str:
+    def __attrs_str(self, tag: str, attrs: list[tuple[str, str | None]]) -> str:
         attrs_list = [
             f"{name}='{escape(value)}'"
             for (name, value) in attrs
-            if name in self.ALLOWED_ATTRS and value
+            if (tag, name) in self.ALLOWED_ATTRS and value
         ]
 
         if attrs_list:
@@ -177,8 +177,9 @@ class HTMLParser(PythonHTMLParser):
         if self.__tag in self.NO_BREAK_TAGS:
             return False
 
-        if self.__stripped_line.endswith(
-            tuple(f"{tag}>" for tag in (self.ALLOWED_TAGS - self.INLINE_TAGS)),
+        if re.search(
+            rf"({'|'.join(self.ALLOWED_TAGS - self.INLINE_TAGS)})\s*[^>]*?>$",
+            self.__stripped_line,
         ):
             return True
 
@@ -211,14 +212,14 @@ class HTMLParser(PythonHTMLParser):
             # place directly after last non-whitespace-character of line
             # linebreak if current tag is breakable
 
-            self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(attrs)}>")
+            self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(tag, attrs)}>")
             if self.__tag not in self.NO_BREAK_TAGS:
                 self.__next_line()
         elif tag == "img":
             # place on new line
 
             self.__next_line()
-            self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(attrs)}>")
+            self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
         else:  # pragma: no cover
             raise ValueError()
 
@@ -226,18 +227,18 @@ class HTMLParser(PythonHTMLParser):
         if tag in self.NO_BREAK_TAGS:
             if self.__break_line:
                 self.__next_line()
-                self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(attrs)}>")
+                self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
                 self.__tag = tag
             else:
                 if self.__strip_line(tag=tag):
-                    self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(attrs)}>")
+                    self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(tag, attrs)}>")
                 else:
-                    self.__append_to_line(f"<{tag}{self.__attrs_str(attrs)}>")
+                    self.__append_to_line(f"<{tag}{self.__attrs_str(tag, attrs)}>")
 
                 self.__tag = tag
         else:
             self.__next_line()
-            self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(attrs)}>")
+            self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
             self.__tag = tag
             self.__indent_level += 1
 
