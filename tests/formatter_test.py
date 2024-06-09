@@ -151,6 +151,14 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ("<ol>\n  <li>foo</li>\n</ol>", "<ol>\n  <li>foo</li>\n</ol>"),
         ("<ol start='2'>\n  <li>foo</li>\n</ol>", "<ol start='2'>\n  <li>foo</li>\n</ol>"),
         ("NAD⁺ + Pᵢ", "NAD<sup>+</sup> + P<sub>i</sub>"),
+        (r"\[A <=> B\]", r"\[A <=> B\]"),
+        (r"\(A <=> B\)", r"\(A <=> B\)"),
+        (r"foo <=> bar \[A <=> B\]", r"foo ⇔ bar \[A <=> B\]"),
+        (r"foo <=> bar \(A <=> B\)", r"foo ⇔ bar \(A <=> B\)"),
+        (r"\[A <=> B\] foo <=> bar", r"\[A <=> B\] foo ⇔ bar"),
+        (r"\(A <=> B\) foo <=> bar", r"\(A <=> B\) foo ⇔ bar"),
+        (r"foo <=> bar \[A <=> B\] foo <=> bar", r"foo ⇔ bar \[A <=> B\] foo ⇔ bar"),
+        (r"foo <=> bar \(A <=> B\) foo <=> bar", r"foo ⇔ bar \(A <=> B\) foo ⇔ bar"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:

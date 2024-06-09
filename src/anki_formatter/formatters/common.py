@@ -8,6 +8,21 @@ from bs4 import NavigableString
 from bs4 import Tag
 
 
+def _extract_mathjax(text: str) -> list[tuple[str, bool]]:
+    segments = []
+
+    last_end = 0
+    for match in re.finditer(r"(\\\[(.*?)\\\]|\\\((.*?)\\\))", text):
+        start, end = match.span()
+        if last_end < start:
+            segments.append((text[last_end:start], False))
+        segments.append((text[start:end], True))
+        last_end = end
+    segments.append((text[last_end:], False))
+
+    return segments
+
+
 def fix_encoding(text: str) -> str:
     return (
         text.encode("utf-8", errors="ignore")
@@ -34,8 +49,10 @@ def replace_symbols(
         )
 
     if not tags_only:
-        text = (
-            text.replace("&lt;-&gt;", "↔")
+        text = "".join(
+            segment
+            if is_mathjax
+            else segment.replace("&lt;-&gt;", "↔")
             .replace("<->", "↔")
             .replace("-&gt;", "→")
             .replace("->", "→")
@@ -47,6 +64,7 @@ def replace_symbols(
             .replace("=>", "⇒")
             .replace("&lt;=", "⇐")
             .replace("<=", "⇐")
+            for segment, is_mathjax in _extract_mathjax(text)
         )
 
     if html:
