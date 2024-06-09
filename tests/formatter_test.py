@@ -28,6 +28,7 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
         ("<strong>foo</strong>bar", "foobar"),
         ("foo&nbsp;bar", "foo bar"),
         ("foo\u00adbar", "foobar"),
+        ("NAD<sup>+</sup> + P<sub>i</sub>", "NAD⁺ + Pᵢ"),
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
@@ -149,6 +150,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ("foo <b>foobar</b> bar", "foo <strong>foobar</strong> bar"),
         ("<ol>\n  <li>foo</li>\n</ol>", "<ol>\n  <li>foo</li>\n</ol>"),
         ("<ol start='2'>\n  <li>foo</li>\n</ol>", "<ol start='2'>\n  <li>foo</li>\n</ol>"),
+        ("NAD⁺ + Pᵢ", "NAD<sup>+</sup> + P<sub>i</sub>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:

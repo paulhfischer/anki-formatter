@@ -17,27 +17,98 @@ def fix_encoding(text: str) -> str:
     )
 
 
-def replace_symbols(text: str) -> str:
-    return (
-        text.replace("&lt;-&gt;", "↔")
-        .replace("<->", "↔")
-        .replace("-&gt;", "→")
-        .replace("->", "→")
-        .replace("&lt;-", "←")
-        .replace("<-", "←")
-        .replace("&lt;=&gt;", "⇔")
-        .replace("<=>", "⇔")
-        .replace("=&gt;", "⇒")
-        .replace("=>", "⇒")
-        .replace("&lt;=", "⇐")
-        .replace("<=", "⇐")
-        .replace("&nbsp;", " ")
-        .replace("\xa0", " ")
-        .replace("“", '"')
-        .replace("”", '"')
-        .replace("„", '"')
-        .replace("‟", '"')
-    )
+def replace_symbols(
+    text: str,
+    *,
+    html: bool,
+    tags_only: bool = False,
+) -> str:
+    if not tags_only:
+        text = (
+            text.replace("&nbsp;", " ")
+            .replace("\xa0", " ")
+            .replace("“", '"')
+            .replace("”", '"')
+            .replace("„", '"')
+            .replace("‟", '"')
+        )
+
+    if not tags_only:
+        text = (
+            text.replace("&lt;-&gt;", "↔")
+            .replace("<->", "↔")
+            .replace("-&gt;", "→")
+            .replace("->", "→")
+            .replace("&lt;-", "←")
+            .replace("<-", "←")
+            .replace("&lt;=&gt;", "⇔")
+            .replace("<=>", "⇔")
+            .replace("=&gt;", "⇒")
+            .replace("=>", "⇒")
+            .replace("&lt;=", "⇐")
+            .replace("<=", "⇐")
+        )
+
+    if html:
+        text = (
+            text.replace("⁺", "<sup>+</sup>")
+            .replace("⁻", "<sup>-</sup>")
+            .replace("⁰", "<sup>0</sup>")
+            .replace("¹", "<sup>1</sup>")
+            .replace("²", "<sup>2</sup>")
+            .replace("³", "<sup>3</sup>")
+            .replace("⁴", "<sup>4</sup>")
+            .replace("⁵", "<sup>5</sup>")
+            .replace("⁶", "<sup>6</sup>")
+            .replace("⁷", "<sup>7</sup>")
+            .replace("⁸", "<sup>8</sup>")
+            .replace("⁹", "<sup>9</sup>")
+            .replace("₊", "<sub>+</sub>")
+            .replace("₋", "<sub>-</sub>")
+            .replace("₀", "<sub>0</sub>")
+            .replace("₁", "<sub>1</sub>")
+            .replace("₂", "<sub>2</sub>")
+            .replace("₃", "<sub>3</sub>")
+            .replace("₄", "<sub>4</sub>")
+            .replace("₅", "<sub>5</sub>")
+            .replace("₆", "<sub>6</sub>")
+            .replace("₇", "<sub>7</sub>")
+            .replace("₈", "<sub>8</sub>")
+            .replace("₉", "<sub>9</sub>")
+            .replace("ᵢ", "<sub>i</sub>")
+        )
+    else:
+        text = (
+            text.replace("<sup>+</sup>", "⁺")
+            .replace("<sup>-</sup>", "⁻")
+            .replace("<sup>–</sup>", "⁻")
+            .replace("<sup>0</sup>", "⁰")
+            .replace("<sup>1</sup>", "¹")
+            .replace("<sup>2</sup>", "²")
+            .replace("<sup>3</sup>", "³")
+            .replace("<sup>4</sup>", "⁴")
+            .replace("<sup>5</sup>", "⁵")
+            .replace("<sup>6</sup>", "⁶")
+            .replace("<sup>7</sup>", "⁷")
+            .replace("<sup>8</sup>", "⁸")
+            .replace("<sup>9</sup>", "⁹")
+            .replace("<sub>+</sub>", "₊")
+            .replace("<sub>-</sub>", "₋")
+            .replace("<sub>–</sub>", "₋")
+            .replace("<sub>0</sub>", "₀")
+            .replace("<sub>1</sub>", "₁")
+            .replace("<sub>2</sub>", "₂")
+            .replace("<sub>3</sub>", "₃")
+            .replace("<sub>4</sub>", "₄")
+            .replace("<sub>5</sub>", "₅")
+            .replace("<sub>6</sub>", "₆")
+            .replace("<sub>7</sub>", "₇")
+            .replace("<sub>8</sub>", "₈")
+            .replace("<sub>9</sub>", "₉")
+            .replace("<sub>i</sub>", "ᵢ")
+        )
+
+    return text
 
 
 def strip_whitespace_between_tags(text: str) -> str:

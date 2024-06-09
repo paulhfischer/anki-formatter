@@ -48,6 +48,7 @@ def _preserve_whitespace(text: str) -> str:
 
 def preprocess(text: str) -> str:
     text = fix_encoding(text)
+    text = replace_symbols(text, html=True, tags_only=True)
 
     text = _preserve_whitespace(text)
 
@@ -258,7 +259,7 @@ class HTMLParser(PythonHTMLParser):
             self.__append_to_line(f"{self.__indent}</{tag}>")
 
     def handle_data(self, data: str) -> None:
-        data = replace_symbols(data)
+        data = replace_symbols(data, html=True)
 
         if data.startswith(("☷", "☰")) and data[1:].startswith(tuple(self.NO_WHITESPACE_BEFORE)):
             data = data[1:]
