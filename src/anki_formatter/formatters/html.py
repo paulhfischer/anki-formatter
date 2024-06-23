@@ -18,6 +18,7 @@ ALLOWED_TAGS = {
     "li",
     "b",
     "i",
+    "u",
     "sub",
     "sup",
     "br",
@@ -27,7 +28,7 @@ ALLOWED_TAGS = {
 
 
 def _preserve_whitespace(text: str) -> str:
-    for tag in ("strong", "b", "em", "i", "sub", "sup"):
+    for tag in ("strong", "b", "em", "i", "ins", "u", "sub", "sup"):
         # move whitespace out of tag
         text = text.replace(f" </{tag}>", f"</{tag}> ").replace(f"&nbsp;</{tag}>", f"</{tag}> ")
         text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
@@ -61,6 +62,8 @@ def preprocess(text: str) -> str:
         tag.name = "b"
     for tag in soup.find_all("em"):
         tag.name = "i"
+    for tag in soup.find_all("ins"):
+        tag.name = "u"
 
     # remove unwanted tags
     for tag in soup.find_all():
@@ -87,7 +90,7 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
-    for tag in ("b", "i", "sub", "sup"):
+    for tag in ("b", "i", "u", "sub", "sup"):
         # remove unwanted whitespace between tags and merge them
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
 
@@ -114,6 +117,7 @@ class HTMLParser(PythonHTMLParser):
         self.INLINE_TAGS = {
             "b",
             "i",
+            "u",
             "sub",
             "sup",
             "anki-mathjax",

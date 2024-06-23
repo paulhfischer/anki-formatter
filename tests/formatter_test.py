@@ -147,6 +147,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ("foo <i>bar</i> foobar", "foo <i>bar</i> foobar"),
         ("<strong>foobar</strong>", "<b>foobar</b>"),
         ("<em>foobar</em>", "<i>foobar</i>"),
+        ("<ins>foobar</ins>", "<u>foobar</u>"),
         ("foo <strong>foobar</strong> bar", "foo <b>foobar</b> bar"),
         ("<ol>\n  <li>foo</li>\n</ol>", "<ol>\n  <li>foo</li>\n</ol>"),
         ("<ol start='2'>\n  <li>foo</li>\n</ol>", "<ol start='2'>\n  <li>foo</li>\n</ol>"),
