@@ -16,8 +16,8 @@ ALLOWED_TAGS = {
     "ul",
     "ol",
     "li",
-    "strong",
-    "em",
+    "b",
+    "i",
     "sub",
     "sup",
     "br",
@@ -56,11 +56,11 @@ def preprocess(text: str) -> str:
         warnings.simplefilter("ignore")
         soup = BeautifulSoup(text, "html.parser")
 
-    # use semantic tags
-    for tag in soup.find_all("b"):
-        tag.name = "strong"
-    for tag in soup.find_all("i"):
-        tag.name = "em"
+    # use formatting tags
+    for tag in soup.find_all("strong"):
+        tag.name = "b"
+    for tag in soup.find_all("em"):
+        tag.name = "i"
 
     # remove unwanted tags
     for tag in soup.find_all():
@@ -87,7 +87,7 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
-    for tag in ("strong", "em", "sub", "sup"):
+    for tag in ("b", "i", "sub", "sup"):
         # remove unwanted whitespace between tags and merge them
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
 
@@ -112,8 +112,8 @@ class HTMLParser(PythonHTMLParser):
         self.INDENT = 2
         self.ALLOWED_TAGS = ALLOWED_TAGS  # all other tags will be removed
         self.INLINE_TAGS = {
-            "strong",
-            "em",
+            "b",
+            "i",
             "sub",
             "sup",
             "anki-mathjax",
