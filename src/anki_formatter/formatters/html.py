@@ -103,7 +103,7 @@ def postprocess(text: str) -> str:
         text = text.replace(f"☷<{tag}>", f" <{tag}>")
 
     # remove br at end of li-items
-    text = re.sub(r"(?:<br>)+</li>", "</li>", text)
+    text = re.sub(r"(?:<br>\s*)+</li>", "</li>", text)
 
     text = text.rstrip()
 
