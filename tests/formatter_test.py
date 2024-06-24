@@ -160,6 +160,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         (r"\(A <=> B\) foo <=> bar", r"\(A <=> B\) foo ⇔ bar"),
         (r"foo <=> bar \[A <=> B\] foo <=> bar", r"foo ⇔ bar \[A <=> B\] foo ⇔ bar"),
         (r"foo <=> bar \(A <=> B\) foo <=> bar", r"foo ⇔ bar \(A <=> B\) foo ⇔ bar"),
+        ("<b>foo</b>&nbsp;<i>bar</i>", "<b>foo</b> <i>bar</i>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:

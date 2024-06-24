@@ -34,8 +34,9 @@ def _preserve_whitespace(text: str) -> str:
         text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
 
         # preserve whitespace before and after formatting-tags
-        text = re.sub(rf"</{tag}>(?: \n*)+<{tag}>", f"</{tag}>☰<{tag}>", text)
-        text = re.sub(rf"</{tag}>(?:&nbsp;\n*)+<{tag}>", f"</{tag}>☰<{tag}>", text)
+        for tag2 in ("strong", "b", "em", "i", "ins", "u", "sub", "sup"):
+            text = re.sub(rf"</{tag}>(?: \n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
+            text = re.sub(rf"</{tag}>(?:&nbsp;\n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
         text = text.replace(f"</{tag}> ", f"</{tag}>☷").replace(f"</{tag}>&nbsp;", f"</{tag}>☷")
         text = text.replace(f" <{tag}>", f"☷<{tag}>").replace(f"&nbsp;<{tag}>", f"☷<{tag}>")
 
@@ -96,7 +97,8 @@ def postprocess(text: str) -> str:
 
         # undo preserve whitespace before and after formatting-tags
         text = re.sub(rf"</{tag}> *", f"</{tag}>", text)
-        text = text.replace(f"</{tag}>☰<{tag}>", f"</{tag}> <{tag}>")
+        for tag2 in ("b", "i", "u", "sub", "sup"):
+            text = text.replace(f"</{tag}>☰<{tag2}>", f"</{tag}> <{tag2}>")
         text = text.replace(f"</{tag}>☷", f"</{tag}> ")
         text = text.replace(f"☷<{tag}>", f" <{tag}>")
 
