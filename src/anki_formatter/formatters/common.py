@@ -166,7 +166,7 @@ def format_number(
     *,
     lower_limit: int | float | None = None,
     upper_limit: int | float | None = None,
-) -> int | float:
+) -> int:
     number = float(number)
     number = round(number)
 
@@ -176,7 +176,4 @@ def format_number(
     if upper_limit:
         number = min(number, upper_limit)
 
-    if number % 1 == 0:
-        return int(number)
-    else:
-        return number
+    return int(number)

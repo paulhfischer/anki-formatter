@@ -219,7 +219,7 @@ def test_html_formatter(input: str, expected_output: str) -> None:
   </g>
   <g id='masks'>
     <title>Masks</title>
-    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='0.5' y='1364.5' width='261' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
+    <rect id='628be4152337460db5e8d5e58c13425a-ao-1' x='0' y='1364' width='261' height='135' fill='#FFEBA2' stroke='#2D2D2D' stroke-width='1'/>
   </g>
 </svg>""",  # noqa: E501
         ),

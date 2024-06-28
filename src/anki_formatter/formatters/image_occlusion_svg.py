@@ -39,7 +39,7 @@ CONFIG = mw.addonManager.getConfig(__name__)["imageOcclusionSVG"]
 
 STROKE: bool = CONFIG["stroke"]["active"]
 STROKE_COLOR: str = CONFIG["stroke"]["color"]
-STROKE_WIDTH: int | float = format_number(CONFIG["stroke"]["width"])
+STROKE_WIDTH: int = format_number(CONFIG["stroke"]["width"])
 
 BACKGROUND_ACTIVE: str = CONFIG["backgroundActive"]
 BACKGROUND_INACTIVE: str = CONFIG["backgroundInactive"]
@@ -63,11 +63,11 @@ def _natural_sort(item: str) -> list[int | str]:
 
 
 class Label(NamedTuple):
-    x: int | float
-    y: int | float
+    x: int
+    y: int
     anchor: str
 
-    font_size: int | float
+    font_size: int
     font_color: str
 
     text: str
@@ -107,11 +107,11 @@ class Mask(NamedTuple):
 
     active: bool
 
-    x: int | float
-    y: int | float
+    x: int
+    y: int
 
-    width: int | float
-    height: int | float
+    width: int
+    height: int
 
     @classmethod
     def from_tag(cls, tag: Tag, svg_width: int | float, svg_height: int | float) -> Mask:
@@ -217,8 +217,8 @@ class SVG(NamedTuple):
     labels: Group
     masks: Group
 
-    width: int | float
-    height: int | float
+    width: int
+    height: int
 
     @classmethod
     def from_tag(cls, tag: Tag) -> SVG:
