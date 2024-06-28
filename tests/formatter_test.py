@@ -15,9 +15,11 @@ from anki_formatter.formatters.skip import skip
     (("foobar", ""),),
 )
 def test_clear_formatter(input: str, expected_output: str) -> None:
-    ret, _ = clear(input)
+    ret_1, _ = clear(input)
+    ret_2, _ = clear(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -32,9 +34,11 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
-    ret, _ = convert_to_plaintext(input)
+    ret_1, _ = convert_to_plaintext(input)
+    ret_2, _ = convert_to_plaintext(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -45,9 +49,11 @@ def test_plaintext_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_skip_formatter(input: str, expected_output: str) -> None:
-    ret, _ = skip(input)
+    ret_1, _ = skip(input)
+    ret_2, _ = skip(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -58,9 +64,11 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_occlusion_formatter(input: str, expected_output: str) -> None:
-    ret, _ = format_occlusion(input)
+    ret_1, _ = format_occlusion(input)
+    ret_2, _ = format_occlusion(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -165,9 +173,11 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
-    ret, _ = format_html(input)
+    ret_1, _ = format_html(input)
+    ret_2, _ = format_html(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -390,6 +400,8 @@ def test_html_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_image_occlusion_svg_formatter(input: str, expected_output: str) -> None:
-    ret = format_image_occlusion_svg(input)
+    ret_1 = format_image_occlusion_svg(input)
+    ret_2 = format_image_occlusion_svg(ret_1)
 
-    assert ret == expected_output
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
