@@ -37,6 +37,13 @@ FORMATTING_TAGS = {
     "sup",
 }
 
+EMPTY_TAGS = {
+    "br",
+    "img",
+    "col",
+    "td",
+}
+
 
 def _preserve_whitespace(text: str) -> str:
     for tag in FORMATTING_TAGS:
@@ -87,7 +94,7 @@ def preprocess(text: str) -> str:
         if (
             len(tag.get_text(strip=True)) == 0
             and len([content for content in tag.contents if content != "\n"]) == 0
-            and tag.name not in {"br", "img"}
+            and tag.name not in EMPTY_TAGS
         ):
             tag.extract()
 
