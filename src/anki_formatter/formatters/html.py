@@ -86,6 +86,13 @@ def preprocess(text: str) -> str:
     for tag in soup.find_all("ins"):
         tag.name = "u"
 
+    # merge redundant tags
+    for tag in FORMATTING_TAGS:
+        for outer_tag in soup.find_all(tag):
+            nested_tags = outer_tag.find_all(tag, recursive=False)
+            for nested in nested_tags:
+                nested.unwrap()
+
     # remove unwanted tags
     for tag in soup.find_all():
         if tag.name not in ALLOWED_TAGS:
@@ -116,12 +123,9 @@ def postprocess(text: str) -> str:
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
         text = re.sub(rf"</{tag}> *", f"</{tag}>", text)
 
-    # undo preserve whitespace before and after formatting-tags
-    for tag_1, tag_2 in product(FORMATTING_TAGS, repeat=2):
-        text = text.replace(f"</{tag_1}>☰<{tag_2}>", f"</{tag_1}> <{tag_2}>")
-    for tag in FORMATTING_TAGS:
-        text = text.replace(f"</{tag}>☷", f"</{tag}> ")
-        text = text.replace(f"☷<{tag}>", f" <{tag}>")
+    # undo preserve whitespace
+    text = text.replace("☰", " ")
+    text = text.replace("☷", " ")
 
     # collapse multiple spaces between words and tags
     text = re.sub(r"(?<=\S) +(?=\S)", " ", text)
