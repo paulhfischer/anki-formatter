@@ -185,6 +185,31 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ("<li><u>foo</u><b>bar</b></li>", "<li><u>foo</u><b>bar</b></li>"),
         ("<li><u>foo</u><br><u>bar</u></li>", "<li><u>foo</u><br><u>bar</u></li>"),
         ("<li><u>foo</u><br><b>bar</b></li>", "<li><u>foo</u><br><b>bar</b></li>"),
+        (
+            '<table style="border-collapse: collapse"><caption>foobar</caption><colgroup><col style="width: 20%"><col style="width: 80%; height: 32px"></colgroup><tbody><tr><td style="text-align: center;">foo</td><td style="text-align: center;">bar</td></tr><tr><td>foo<br>bar</td><td>foo<br>bar</td></tr><tr><td><u>foo</u><br><u>bar</u></td><td><u>foo</u><br><b>bar</b></td></tr></tbody></table>',  # noqa: E501
+            """\
+<table border='1' style='border-collapse: collapse;'>
+  <caption>foobar</caption>
+  <colgroup>
+    <col style='width: 20%;'>
+    <col style='width: 80%;'>
+  </colgroup>
+  <tbody>
+    <tr>
+      <td style='text-align: center;'>foo</td>
+      <td style='text-align: center;'>bar</td>
+    </tr>
+    <tr>
+      <td>foo<br>bar</td>
+      <td>foo<br>bar</td>
+    </tr>
+    <tr>
+      <td><u>foo</u><br><u>bar</u></td>
+      <td><u>foo</u><br><b>bar</b></td>
+    </tr>
+  </tbody>
+</table>""",
+        ),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:

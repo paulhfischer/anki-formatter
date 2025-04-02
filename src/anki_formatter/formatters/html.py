@@ -5,6 +5,7 @@ import warnings
 from html import escape
 from html.parser import HTMLParser as PythonHTMLParser
 from itertools import product
+from typing import Literal
 
 from bs4 import BeautifulSoup
 
@@ -25,6 +26,13 @@ ALLOWED_TAGS = {
     "br",
     "img",
     "anki-mathjax",
+    "table",
+    "caption",
+    "tbody",
+    "colgroup",
+    "col",
+    "td",
+    "tr",
 }
 
 FORMATTING_TAGS = {
@@ -152,6 +160,8 @@ class HTMLParser(PythonHTMLParser):
         }  # these tags will be placed on the current line
         self.NO_BREAK_TAGS = self.INLINE_TAGS | {
             "li",
+            "caption",
+            "td",
         }  # inside these tags, there will be no line break
 
         self.NO_WHITESPACE_BEFORE = {
@@ -172,7 +182,27 @@ class HTMLParser(PythonHTMLParser):
             "☰",
         }  # whitespace after of these strings will be removed
 
-        self.ALLOWED_ATTRS = {("img", "src"), ("ol", "start")}  # all other attrs will be removed
+        self.ALLOWED_ATTRS: dict[tuple[str, str], None | dict[str, set[str] | Literal["*"]]] = {
+            ("img", "src"): None,
+            ("ol", "start"): None,
+            ("col", "style"): {
+                "width": "*",
+            },
+            ("td", "rowspan"): None,
+            ("td", "colspan"): None,
+            ("td", "style"): {
+                "text-align": {"center", "right"},
+                "white-space": {"nowrap"},
+            },
+        }  # all other attrs will be removed
+
+        self.REQUIRED_ATTRS: dict[tuple[str, str], str | dict[str, str]] = {
+            ("table", "border"): "1",
+            ("table", "style"): {
+                "border-collapse": "collapse",
+            },
+        }  # these attrs will always be set
+
         self.RSTRIP_CHARS = (
             " ☷"  # these characters will be treated as whitespace and stripped if needed
         )
@@ -184,11 +214,42 @@ class HTMLParser(PythonHTMLParser):
         self.__lines: list[str] = []
 
     def __attrs_str(self, tag: str, attrs: list[tuple[str, str | None]]) -> str:
-        attrs_list = [
-            f"{name}='{escape(value)}'"
-            for (name, value) in attrs
-            if (tag, name) in self.ALLOWED_ATTRS and value
-        ]
+        attrs_list: list[str] = []
+
+        for attr_key, attr_value in attrs:
+            if (tag, attr_key) in self.ALLOWED_ATTRS and attr_value:
+                rules = self.ALLOWED_ATTRS[(tag, attr_key)]
+
+                if rules is None:
+                    attrs_list.append(f"{attr_key}='{escape(attr_value)}'")
+                elif isinstance(rules, dict) and attr_key == "style":
+                    original_style = {
+                        k.strip(): v.strip()
+                        for item in attr_value.split(";")
+                        if ":" in item
+                        for k, v in [item.split(":", 1)]
+                    }
+                    filtered_style = {
+                        key: value
+                        for key, value in original_style.items()
+                        if key in rules and (rules[key] == "*" or value in rules[key])
+                    }
+                    attrs_list.append(
+                        f"{attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in filtered_style.items()))};'",  # noqa: E501
+                    )
+                else:  # pragma: no cover
+                    raise ValueError
+
+        for (tag_name, required_attr_key), required_attr_value in self.REQUIRED_ATTRS.items():
+            if tag_name == tag:
+                if isinstance(required_attr_value, str):
+                    attrs_list.append(f"{required_attr_key}='{escape(required_attr_value)}'")
+                elif isinstance(required_attr_value, dict) and required_attr_key == "style":
+                    attrs_list.append(
+                        f"{required_attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in required_attr_value.items()))};'",  # noqa: E501
+                    )
+                else:  # pragma: no cover
+                    raise ValueError
 
         if attrs_list:
             return " " + " ".join(attrs_list)
@@ -253,6 +314,11 @@ class HTMLParser(PythonHTMLParser):
             if not (self.__tag_stack and self.__tag_stack[-1] in self.NO_BREAK_TAGS):
                 self.__next_line()
         elif tag == "img":
+            # place on new line
+
+            self.__next_line()
+            self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
+        elif tag == "col":
             # place on new line
 
             self.__next_line()
