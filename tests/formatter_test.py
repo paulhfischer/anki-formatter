@@ -180,6 +180,11 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ("<u>foo<b>bas</b> <u> bar</u></u>", "<u>foo<b>bas</b> bar</u>"),
         ("<u>foo<b>bas </b> <b>  bar</b></u>", "<u>foo<b>bas</b> <b>bar</b></u>"),
         ("<u>foo<b>bas </b> <u>  bar</u></u>", "<u>foo<b>bas</b> bar</u>"),
+        ("<li>foo<br>bar</li>", "<li>foo<br>bar</li>"),
+        ("<li><u>foo</u><u>bar</u></li>", "<li><u>foobar</u></li>"),
+        ("<li><u>foo</u><b>bar</b></li>", "<li><u>foo</u><b>bar</b></li>"),
+        ("<li><u>foo</u><br><u>bar</u></li>", "<li><u>foo</u><br><u>bar</u></li>"),
+        ("<li><u>foo</u><br><b>bar</b></li>", "<li><u>foo</u><br><b>bar</b></li>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:

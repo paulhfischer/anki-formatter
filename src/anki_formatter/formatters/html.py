@@ -180,6 +180,7 @@ class HTMLParser(PythonHTMLParser):
         self.__indent_level = 0
         self.__line = ""
         self.__tag = ""
+        self.__tag_stack: list[str] = []
         self.__lines: list[str] = []
 
     def __attrs_str(self, tag: str, attrs: list[tuple[str, str | None]]) -> str:
@@ -206,6 +207,9 @@ class HTMLParser(PythonHTMLParser):
     def __break_line(self) -> bool:
         if not self.__line:
             return True
+
+        if self.__stripped_line.endswith("<br>"):
+            return False
 
         if self.__tag in self.NO_BREAK_TAGS:
             return False
@@ -246,7 +250,7 @@ class HTMLParser(PythonHTMLParser):
             # linebreak if current tag is breakable
 
             self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(tag, attrs)}>")
-            if self.__tag not in self.NO_BREAK_TAGS:
+            if not (self.__tag_stack and self.__tag_stack[-1] in self.NO_BREAK_TAGS):
                 self.__next_line()
         elif tag == "img":
             # place on new line
@@ -261,7 +265,6 @@ class HTMLParser(PythonHTMLParser):
             if self.__break_line:
                 self.__next_line()
                 self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
-                self.__tag = tag
             else:
                 if self.__strip_line(tag=tag):
                     self.__append_to_stripped_line(f"<{tag}{self.__attrs_str(tag, attrs)}>")
@@ -272,8 +275,10 @@ class HTMLParser(PythonHTMLParser):
         else:
             self.__next_line()
             self.__append_to_line(f"{self.__indent}<{tag}{self.__attrs_str(tag, attrs)}>")
-            self.__tag = tag
             self.__indent_level += 1
+
+        self.__tag = tag
+        self.__tag_stack.append(tag)
 
     def handle_endtag(self, tag: str) -> None:
         if tag in self.NO_BREAK_TAGS:
@@ -281,14 +286,15 @@ class HTMLParser(PythonHTMLParser):
                 self.__append_to_stripped_line(f"</{tag}>")
             else:
                 self.__append_to_stripped_line(f"</{tag}> ")
-
-            self.__tag = ""
         else:
             self.__indent_level -= 1
-            self.__tag = ""
 
             self.__next_line()
             self.__append_to_line(f"{self.__indent}</{tag}>")
+
+        self.__tag = ""
+        assert self.__tag_stack and self.__tag_stack[-1] == tag
+        self.__tag_stack.pop()
 
     def handle_data(self, data: str) -> None:
         data = replace_symbols(data, html=True)
