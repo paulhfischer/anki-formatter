@@ -4,6 +4,7 @@ import re
 import warnings
 from html import escape
 from html.parser import HTMLParser as PythonHTMLParser
+from itertools import product
 
 from bs4 import BeautifulSoup
 
@@ -46,22 +47,23 @@ EMPTY_TAGS = {
 
 
 def _preserve_whitespace(text: str) -> str:
-    for tag in FORMATTING_TAGS:
-        # move whitespace out of tag
-        text = text.replace(f" </{tag}>", f"</{tag}> ").replace(f"&nbsp;</{tag}>", f"</{tag}> ")
-        text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
+    text = text.replace("&nbsp;", " ")
 
-        # preserve whitespace before and after formatting-tags
-        for tag2 in FORMATTING_TAGS:
-            text = re.sub(rf"</{tag}>(?: \n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
-            text = re.sub(rf"</{tag}>(?:&nbsp;\n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
-        text = text.replace(f"</{tag}> ", f"</{tag}>☷").replace(f"</{tag}>&nbsp;", f"</{tag}>☷")
-        text = text.replace(f" <{tag}>", f"☷<{tag}>").replace(f"&nbsp;<{tag}>", f"☷<{tag}>")
+    # move whitespace out of tag
+    for tag in FORMATTING_TAGS:
+        text = text.replace(f" </{tag}>", f"</{tag}> ")
+        text = text.replace(f"<{tag}> ", f" <{tag}>")
+
+    # preserve whitespace before and after formatting-tags
+    for tag_1, tag_2 in product(FORMATTING_TAGS, repeat=2):
+        text = re.sub(rf"</{tag_1}>(?: \n*)+<{tag_2}>", f"</{tag_1}>☰<{tag_2}>", text)
+    for tag in FORMATTING_TAGS:
+        text = text.replace(f"</{tag}> ", f"</{tag}>☷")
+        text = text.replace(f" <{tag}>", f"☷<{tag}>")
 
     # merge preserved whitspace
     text = re.sub(r"☷+", "☷", text)
-    text = re.sub(r"☰+", "☰", text)
-    text = re.sub(r"☷☰", "☰", text)
+    text = re.sub(r"[☷☰]+", lambda m: "☰" if "☰" in m.group() else m.group(), text)
 
     return text
 
@@ -109,16 +111,23 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
+    # remove unwanted whitespace between and after formatting-tags and merge them
     for tag in FORMATTING_TAGS:
-        # remove unwanted whitespace between tags and merge them
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
-
-        # undo preserve whitespace before and after formatting-tags
         text = re.sub(rf"</{tag}> *", f"</{tag}>", text)
-        for tag2 in FORMATTING_TAGS:
-            text = text.replace(f"</{tag}>☰<{tag2}>", f"</{tag}> <{tag2}>")
+
+    # undo preserve whitespace before and after formatting-tags
+    for tag_1, tag_2 in product(FORMATTING_TAGS, repeat=2):
+        text = text.replace(f"</{tag_1}>☰<{tag_2}>", f"</{tag_1}> <{tag_2}>")
+    for tag in FORMATTING_TAGS:
         text = text.replace(f"</{tag}>☷", f"</{tag}> ")
         text = text.replace(f"☷<{tag}>", f" <{tag}>")
+
+    # collapse multiple spaces between words and tags
+    text = re.sub(r"(?<=\S) +(?=\S)", " ", text)
+    text = re.sub(r"(?<=>) +(?=\S)", " ", text)
+    text = re.sub(r"(?<=\S) +(?=<)", " ", text)
+    text = re.sub(r"(?<=>) +(?=<)", " ", text)
 
     # remove br at end of li-items
     text = re.sub(r"(?:<br>\s*)+</li>", "</li>", text)
