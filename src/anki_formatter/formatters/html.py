@@ -26,15 +26,26 @@ ALLOWED_TAGS = {
     "anki-mathjax",
 }
 
+FORMATTING_TAGS = {
+    "strong",
+    "b",
+    "em",
+    "i",
+    "ins",
+    "u",
+    "sub",
+    "sup",
+}
+
 
 def _preserve_whitespace(text: str) -> str:
-    for tag in ("strong", "b", "em", "i", "ins", "u", "sub", "sup"):
+    for tag in FORMATTING_TAGS:
         # move whitespace out of tag
         text = text.replace(f" </{tag}>", f"</{tag}> ").replace(f"&nbsp;</{tag}>", f"</{tag}> ")
         text = text.replace(f"<{tag}> ", f" <{tag}>").replace(f"<{tag}>&nbsp;", f" <{tag}>")
 
         # preserve whitespace before and after formatting-tags
-        for tag2 in ("strong", "b", "em", "i", "ins", "u", "sub", "sup"):
+        for tag2 in FORMATTING_TAGS:
             text = re.sub(rf"</{tag}>(?: \n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
             text = re.sub(rf"</{tag}>(?:&nbsp;\n*)+<{tag2}>", f"</{tag}>☰<{tag2}>", text)
         text = text.replace(f"</{tag}> ", f"</{tag}>☷").replace(f"</{tag}>&nbsp;", f"</{tag}>☷")
@@ -91,13 +102,13 @@ def preprocess(text: str) -> str:
 
 
 def postprocess(text: str) -> str:
-    for tag in ("b", "i", "u", "sub", "sup"):
+    for tag in FORMATTING_TAGS:
         # remove unwanted whitespace between tags and merge them
         text = re.sub(f"</{tag}>(?: )*<{tag}>", "", text)
 
         # undo preserve whitespace before and after formatting-tags
         text = re.sub(rf"</{tag}> *", f"</{tag}>", text)
-        for tag2 in ("b", "i", "u", "sub", "sup"):
+        for tag2 in FORMATTING_TAGS:
             text = text.replace(f"</{tag}>☰<{tag2}>", f"</{tag}> <{tag2}>")
         text = text.replace(f"</{tag}>☷", f"</{tag}> ")
         text = text.replace(f"☷<{tag}>", f" <{tag}>")
@@ -116,12 +127,7 @@ class HTMLParser(PythonHTMLParser):
 
         self.INDENT = 2
         self.ALLOWED_TAGS = ALLOWED_TAGS  # all other tags will be removed
-        self.INLINE_TAGS = {
-            "b",
-            "i",
-            "u",
-            "sub",
-            "sup",
+        self.INLINE_TAGS = FORMATTING_TAGS | {
             "anki-mathjax",
         }  # these tags will be placed on the current line
         self.NO_BREAK_TAGS = self.INLINE_TAGS | {
