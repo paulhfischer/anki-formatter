@@ -220,7 +220,7 @@ class HTMLParser(PythonHTMLParser):
                 rules = self.ALLOWED_ATTRS[(tag, attr_key)]
 
                 if rules is None:
-                    attrs_list.append(f"{attr_key}='{escape(attr_value)}'")
+                    attrs_list.append(f'{attr_key}="{escape(attr_value)}"')
                 elif isinstance(rules, dict) and attr_key == "style":
                     original_style = {
                         k.strip(): v.strip()
@@ -235,7 +235,7 @@ class HTMLParser(PythonHTMLParser):
                     }
                     if filtered_style:
                         attrs_list.append(
-                            f"{attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in filtered_style.items()))};'",  # noqa: E501
+                            f'{attr_key}="{escape("; ".join(f"{k}: {v}" for k, v in filtered_style.items()))};"',  # noqa: E501
                         )
                 else:  # pragma: no cover
                     raise ValueError
@@ -243,10 +243,10 @@ class HTMLParser(PythonHTMLParser):
         for (tag_name, required_attr_key), required_attr_value in self.REQUIRED_ATTRS.items():
             if tag_name == tag:
                 if isinstance(required_attr_value, str):
-                    attrs_list.append(f"{required_attr_key}='{escape(required_attr_value)}'")
+                    attrs_list.append(f'{required_attr_key}="{escape(required_attr_value)}"')
                 elif isinstance(required_attr_value, dict) and required_attr_key == "style":
                     attrs_list.append(
-                        f"{required_attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in required_attr_value.items()))};'",  # noqa: E501
+                        f'{required_attr_key}="{escape("; ".join(f"{k}: {v}" for k, v in required_attr_value.items()))};"',  # noqa: E501
                     )
                 else:  # pragma: no cover
                     raise ValueError

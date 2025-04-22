@@ -104,8 +104,8 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
             """line1<br>\nline2""",
         ),
         (
-            """<img src='foo.jpg'><br>bar""",
-            """<img src='foo.jpg'><br>\nbar""",
+            """<img src="foo.jpg"><br>bar""",
+            """<img src="foo.jpg"><br>\nbar""",
         ),
         (
             """<li>foo<br>bar</li>""",
@@ -132,20 +132,20 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
             """text with <b>important</b> part.""",
         ),
         (
-            """<section><img src='foo.jpg'><img src='foo.jpg'></section>""",
-            """<section>\n  <img src='foo.jpg'>\n  <img src='foo.jpg'>\n</section>""",
+            """<section><img src="foo.jpg"><img src="foo.jpg"></section>""",
+            """<section>\n  <img src="foo.jpg">\n  <img src="foo.jpg">\n</section>""",
         ),
         (
             """<section>text <b>with important</b> part!</section>""",
             """<section>\n  text <b>with important</b> part!\n</section>""",
         ),
         (
-            """<section><img src='foo.jpg'><br><img src='bar.jpg'></section>""",
-            """<section>\n  <img src='foo.jpg'><br>\n  <img src='bar.jpg'>\n</section>""",
+            """<section><img src="foo.jpg"><br><img src="bar.jpg"></section>""",
+            """<section>\n  <img src="foo.jpg"><br>\n  <img src="bar.jpg">\n</section>""",
         ),
         (
-            """<section><img src='foo.jpg'><br><b>important</b> info</section>""",
-            """<section>\n  <img src='foo.jpg'><br>\n  <b>important</b> info\n</section>""",
+            """<section><img src="foo.jpg"><br><b>important</b> info</section>""",
+            """<section>\n  <img src="foo.jpg"><br>\n  <b>important</b> info\n</section>""",
         ),
         (
             """<li><b>foo</b> bar</li>""",
@@ -216,8 +216,8 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
             """\"foo\"""",
         ),
         (
-            """<img src='„foo“'>""",
-            """<img src='„foo“'>""",
+            """<img src="„foo“">""",
+            """<img src="„foo“">""",
         ),
         (
             """<li>„foo“</li>""",
@@ -320,8 +320,8 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
             """<ol>\n  <li>foo</li>\n</ol>""",
         ),
         (
-            """<ol start='2'>\n  <li>foo</li>\n</ol>""",
-            """<ol start='2'>\n  <li>foo</li>\n</ol>""",
+            """<ol start="2">\n  <li>foo</li>\n</ol>""",
+            """<ol start="2">\n  <li>foo</li>\n</ol>""",
         ),
         (
             """NAD⁺ + Pᵢ""",
@@ -428,11 +428,11 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
             """<li><u>foo</u><br><b>bar</b></li>""",
         ),
         (
-            """<table style="border-collapse: collapse"><caption>foobar</caption><colgroup><col style="width: 20%"><col style="width: 80%; height: 32px"></colgroup><tbody><tr><td style="text-align: center;">foo</td><td style="text-align: center;">bar</td></tr><tr><td>foo<br>bar</td><td>foo<br>bar</td></tr><tr><td><u>foo</u><br><u>bar</u></td><td><u>foo</u><br><b>bar</b></td></tr></tbody></table>""",  # noqa: E501
-            """<table border='1' style='border-collapse: collapse;'>\n  <caption>foobar</caption>\n  <colgroup>\n    <col style='width: 20%;'>\n    <col style='width: 80%;'>\n  </colgroup>\n  <tbody>\n    <tr>\n      <td style='text-align: center;'>foo</td>\n      <td style='text-align: center;'>bar</td>\n    </tr>\n    <tr>\n      <td>foo<br>bar</td>\n      <td>foo<br>bar</td>\n    </tr>\n    <tr>\n      <td><u>foo</u><br><u>bar</u></td>\n      <td><u>foo</u><br><b>bar</b></td>\n    </tr>\n  </tbody>\n</table>""",  # noqa: E501
+            """<table style='border-collapse: collapse'><caption>foobar</caption><colgroup><col style='width: 20%'><col style='width: 80%; height: 32px'></colgroup><tbody><tr><td style='text-align: center;'>foo</td><td style='text-align: center;'>bar</td></tr><tr><td>foo<br>bar</td><td>foo<br>bar</td></tr><tr><td><u>foo</u><br><u>bar</u></td><td><u>foo</u><br><b>bar</b></td></tr></tbody></table>""",  # noqa: E501
+            """<table border="1" style="border-collapse: collapse;">\n  <caption>foobar</caption>\n  <colgroup>\n    <col style="width: 20%;">\n    <col style="width: 80%;">\n  </colgroup>\n  <tbody>\n    <tr>\n      <td style="text-align: center;">foo</td>\n      <td style="text-align: center;">bar</td>\n    </tr>\n    <tr>\n      <td>foo<br>bar</td>\n      <td>foo<br>bar</td>\n    </tr>\n    <tr>\n      <td><u>foo</u><br><u>bar</u></td>\n      <td><u>foo</u><br><b>bar</b></td>\n    </tr>\n  </tbody>\n</table>""",  # noqa: E501
         ),
         (
-            """<td style='foo: bar'>foobar</td>""",
+            """<td style="foo: bar">foobar</td>""",
             """<td>foobar</td>""",
         ),
     ),
