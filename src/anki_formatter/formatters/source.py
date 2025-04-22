@@ -9,7 +9,7 @@ if "pytest" not in sys.modules:  # pragma: no cover
     from aqt.utils import showCritical
 
 
-def format_source(value: str) -> tuple[str, bool]:
+def format_source(value: str, minimized: bool) -> tuple[str, bool]:
     formatted_value = fix_encoding(value)
     formatted_value = replace_symbols(formatted_value, html=False)
     formatted_value = formatted_value.strip()

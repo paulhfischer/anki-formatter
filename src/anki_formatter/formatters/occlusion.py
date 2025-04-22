@@ -5,8 +5,11 @@ import re
 from anki_formatter.formatters.plaintext import convert_to_plaintext
 
 
-def format_occlusion(value: str) -> tuple[str, bool]:
-    formatted_value, _ = convert_to_plaintext(value)
+def format_occlusion(value: str, minimized: bool) -> tuple[str, bool]:
+    if minimized:  # pragma: no cover
+        raise NotImplementedError
+
+    formatted_value, _ = convert_to_plaintext(value, False)
 
     clozes = [
         (int(match[0]), str(match[1]))

@@ -33,8 +33,8 @@ def mocked_links_requests(url: str, timeout: int | None = None) -> Mock:
     (("foobar", ""),),
 )
 def test_clear_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = clear(input)
-    ret_2, _ = clear(ret_1)
+    ret_1, _ = clear(input, False)
+    ret_2, _ = clear(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
@@ -52,8 +52,8 @@ def test_clear_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_plaintext_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = convert_to_plaintext(input)
-    ret_2, _ = convert_to_plaintext(ret_1)
+    ret_1, _ = convert_to_plaintext(input, False)
+    ret_2, _ = convert_to_plaintext(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
@@ -67,8 +67,8 @@ def test_plaintext_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_skip_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = skip(input)
-    ret_2, _ = skip(ret_1)
+    ret_1, _ = skip(input, False)
+    ret_2, _ = skip(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
@@ -82,8 +82,8 @@ def test_skip_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_occlusion_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = format_occlusion(input)
-    ret_2, _ = format_occlusion(ret_1)
+    ret_1, _ = format_occlusion(input, False)
+    ret_2, _ = format_occlusion(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
@@ -231,8 +231,28 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = format_html(input)
-    ret_2, _ = format_html(ret_1)
+    ret_1, _ = format_html(input, False)
+    ret_2, _ = format_html(ret_1, False)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        (
+            """<section>\n  foo<br>\n  <b>bar</b>\n</section>""",
+            """<section>foo<br><b>bar</b></section>""",
+        ),
+    ),
+)
+def test_html_formatter_minimized(input: str, expected_output: str) -> None:
+    ret_1, _ = format_html(input, True)
+    ret_2, _ = format_html(ret_1, True)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
@@ -248,8 +268,8 @@ def test_html_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_date_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = format_date(input)
-    ret_2, _ = format_date(ret_1)
+    ret_1, _ = format_date(input, False)
+    ret_2, _ = format_date(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
@@ -265,8 +285,8 @@ def test_date_formatter(input: str, expected_output: str) -> None:
     ),
 )
 def test_source_formatter(input: str, expected_output: str) -> None:
-    ret_1, _ = format_source(input)
-    ret_2, _ = format_source(ret_1)
+    ret_1, _ = format_source(input, False)
+    ret_2, _ = format_source(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output

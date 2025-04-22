@@ -386,7 +386,7 @@ class HTMLParser(PythonHTMLParser):
         return "\n".join(line.rstrip(self.RSTRIP_CHARS) for line in self.__lines if line)
 
 
-def format_html(html: str) -> tuple[str, bool]:
+def format_html(html: str, minimized: bool) -> tuple[str, bool]:
     formatted_html = preprocess(html)
 
     parser = HTMLParser()
@@ -394,5 +394,8 @@ def format_html(html: str) -> tuple[str, bool]:
     formatted_html = parser.get_parsed_string()
 
     formatted_html = postprocess(formatted_html)
+
+    if minimized:
+        formatted_html = re.sub(r"\n *", "", formatted_html)
 
     return formatted_html, html != formatted_html

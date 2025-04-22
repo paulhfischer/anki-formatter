@@ -399,8 +399,14 @@ def format_image_occlusion_svg(svg: str) -> str:
     return formatter.get_parsed_string()
 
 
-def format_image_occlusion_field(value: str) -> tuple[str, bool]:  # pragma: no cover
-    formatted_value, _ = format_html(value)
+def format_image_occlusion_field(
+    value: str,
+    minimized: bool,
+) -> tuple[str, bool]:  # pragma: no cover
+    if minimized:  # pragma: no cover
+        raise NotImplementedError
+
+    formatted_value, _ = format_html(value, False)
 
     soup = BeautifulSoup(formatted_value, "html.parser")
 

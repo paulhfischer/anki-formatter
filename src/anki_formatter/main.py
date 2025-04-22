@@ -15,7 +15,7 @@ from aqt.utils import showInfo
 from anki_formatter.formatters import FORMATTERS
 
 
-def _load_config(directory: str) -> dict[str, dict[str, Callable[[str], tuple[str, bool]]]]:
+def _load_config(directory: str) -> dict[str, dict[str, Callable[[str, bool], tuple[str, bool]]]]:
     config = {}
 
     for folder_name in os.listdir(directory):
@@ -60,7 +60,8 @@ def _note_fields(note: Note) -> Generator[str, None, None]:
 
 def _format_note(
     note: Note,
-    config: dict[str, dict[str, Callable[[str], tuple[str, bool]]]],
+    config: dict[str, dict[str, Callable[[str, bool], tuple[str, bool]]]],
+    minimized: bool,
 ) -> Note | None:
     changed = False
 
@@ -69,7 +70,7 @@ def _format_note(
 
         original = note[field]
         try:
-            formatted_value, did_format = formatter(original)
+            formatted_value, did_format = formatter(original, minimized)
         except Exception as e:
             showCritical(f"Could not format note {dict(note)}!")
             raise e
@@ -84,7 +85,7 @@ def _format_note(
         return None
 
 
-def main(browser: Browser) -> None:
+def main(browser: Browser, minimized: bool) -> None:
     mw.checkpoint("Format Notes")
     mw.progress.start()
 
@@ -93,7 +94,7 @@ def main(browser: Browser) -> None:
 
     formatted_notes = []
     for note in _selected_notes(browser):
-        formatted_note = _format_note(note, config)
+        formatted_note = _format_note(note, config, minimized)
 
         if formatted_note:
             formatted_notes.append(formatted_note)

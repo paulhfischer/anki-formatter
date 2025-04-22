@@ -8,7 +8,7 @@ from anki_formatter.formatters.common import fix_encoding
 from anki_formatter.formatters.common import replace_symbols
 
 
-def convert_to_plaintext(value: str) -> tuple[str, bool]:
+def convert_to_plaintext(value: str, minimized: bool) -> tuple[str, bool]:
     formatted_value = fix_encoding(value)
     formatted_value = replace_symbols(formatted_value, html=False)
 
