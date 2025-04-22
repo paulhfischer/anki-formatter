@@ -233,9 +233,10 @@ class HTMLParser(PythonHTMLParser):
                         for key, value in original_style.items()
                         if key in rules and (rules[key] == "*" or value in rules[key])
                     }
-                    attrs_list.append(
-                        f"{attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in filtered_style.items()))};'",  # noqa: E501
-                    )
+                    if filtered_style:
+                        attrs_list.append(
+                            f"{attr_key}='{escape('; '.join(f'{k}: {v}' for k, v in filtered_style.items()))};'",  # noqa: E501
+                        )
                 else:  # pragma: no cover
                     raise ValueError
 

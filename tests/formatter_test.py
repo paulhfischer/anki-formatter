@@ -227,6 +227,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
   </tbody>
 </table>""",
         ),
+        ("<td style='foo: bar'>foobar</td>", "<td>foobar</td>"),
     ),
 )
 def test_html_formatter(input: str, expected_output: str) -> None:
