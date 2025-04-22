@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from anki_formatter.formatters.clear import clear
+from anki_formatter.formatters.date import format_date
 from anki_formatter.formatters.html import format_html
 from anki_formatter.formatters.image_occlusion_svg import format_image_occlusion_svg
 from anki_formatter.formatters.occlusion import format_occlusion
@@ -216,6 +217,26 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
 def test_html_formatter(input: str, expected_output: str) -> None:
     ret_1, _ = format_html(input)
     ret_2, _ = format_html(ret_1)
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        ("", ""),
+        ("3.6.24", "06/2024"),
+        ("3/6/24", "06/2024"),
+        ("6/24", "06/2024"),
+        ("3.6.2024", "06/2024"),
+        ("3/6/2024", "06/2024"),
+        ("6/2024", "06/2024"),
+    ),
+)
+def test_date_formatter(input: str, expected_output: str) -> None:
+    ret_1, _ = format_date(input)
+    ret_2, _ = format_date(ret_1)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
 
 
 @pytest.mark.parametrize(
