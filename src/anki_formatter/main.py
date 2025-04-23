@@ -16,7 +16,29 @@ from anki_formatter.formatters import FORMATTERS
 
 
 def _load_config(directory: str) -> dict[str, dict[str, Callable[[str, bool], tuple[str, bool]]]]:
-    config = {}
+    config = {
+        "ProjektAnkiCloze": {
+            "Text": FORMATTERS["html"],
+            "Extra": FORMATTERS["html"],
+            "Bild": FORMATTERS["html"],
+            "Eigene Notizen & Bilder": FORMATTERS["clear"],
+            "Eigene Prüfungsfragen": FORMATTERS["clear"],
+            "Definitionen": FORMATTERS["html"],
+            "Merksprüche": FORMATTERS["html"],
+            "Klinik": FORMATTERS["html"],
+            "Präparat": FORMATTERS["html"],
+            "Memes": FORMATTERS["html"],
+            "Meditricks": FORMATTERS["meditricks"],
+            "AMBOSS-Link": FORMATTERS["plaintext"],
+            "Thieme via medici-Link": FORMATTERS["plaintext"],
+            "weitere Links": FORMATTERS["links"],
+            "Quelle": FORMATTERS["source"],
+            "Datum": FORMATTERS["date"],
+            "One by one": FORMATTERS["plaintext"],  # TODO
+            "Note ID": FORMATTERS["plaintext"],  # TODO
+            "ankihub_id": FORMATTERS["plaintext"],  # TODO
+        },
+    }
 
     for folder_name in os.listdir(directory):
         folder = os.path.join(directory, folder_name)
@@ -66,7 +88,13 @@ def _format_note(
     changed = False
 
     for field in _note_fields(note):
-        formatter = config[note.note_type()["name"]][field]
+        key = next((key for key in config if note.note_type()["name"].startswith(key)), None)
+
+        if key is None:
+            showCritical(f'Could not find a config for note type "{note.note_type()["name"]}".')
+            raise ValueError
+
+        formatter = config[key][field]
 
         original = note[field]
         try:
