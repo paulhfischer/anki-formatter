@@ -6,6 +6,7 @@ from anki_formatter.formatters.clear import clear
 from anki_formatter.formatters.date import format_date
 from anki_formatter.formatters.html import format_html
 from anki_formatter.formatters.image_occlusion_svg import format_image_occlusion_svg
+from anki_formatter.formatters.meditricks import format_meditricks
 from anki_formatter.formatters.occlusion import format_occlusion
 from anki_formatter.formatters.plaintext import convert_to_plaintext
 from anki_formatter.formatters.skip import skip
@@ -251,6 +252,27 @@ def test_date_formatter(input: str, expected_output: str) -> None:
 def test_source_formatter(input: str, expected_output: str) -> None:
     ret_1, _ = format_source(input)
     ret_2, _ = format_source(ret_1)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        (
+            """""",
+            """""",
+        ),
+        (
+            """<div class="mt-anki-iframe-src" data-src="1709395038956"></div>""",
+            """<div class="mt-anki-iframe-src" data-src="1709395038956"></div>""",
+        ),
+    ),
+)
+def test_meditricks_formatter(input: str, expected_output: str) -> None:
+    ret_1, _ = format_meditricks(input, False)
+    ret_2, _ = format_meditricks(ret_1, False)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
