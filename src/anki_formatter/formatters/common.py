@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from collections.abc import Generator
 
+import requests
+from bs4 import BeautifulSoup
 from bs4 import Comment
 from bs4 import NavigableString
 from bs4 import Tag
@@ -177,3 +179,14 @@ def format_number(
         number = min(number, upper_limit)
 
     return int(number)
+
+
+def get_website_title(url: str) -> str:
+    response = requests.get(url, timeout=5)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    title_tag = soup.find("title")
+    assert isinstance(title_tag, Tag)
+    return title_tag.text.strip()

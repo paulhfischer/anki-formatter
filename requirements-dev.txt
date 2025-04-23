@@ -6,3 +6,4 @@ pre-commit
 pytest
 tox
 types-beautifulsoup4
+types-requests

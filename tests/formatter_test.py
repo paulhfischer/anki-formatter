@@ -1,16 +1,31 @@
 from __future__ import annotations
 
+from unittest.mock import Mock
+from unittest.mock import patch
+
 import pytest
 
 from anki_formatter.formatters.clear import clear
 from anki_formatter.formatters.date import format_date
 from anki_formatter.formatters.html import format_html
 from anki_formatter.formatters.image_occlusion_svg import format_image_occlusion_svg
+from anki_formatter.formatters.links import format_links
 from anki_formatter.formatters.meditricks import format_meditricks
 from anki_formatter.formatters.occlusion import format_occlusion
 from anki_formatter.formatters.plaintext import convert_to_plaintext
 from anki_formatter.formatters.skip import skip
 from anki_formatter.formatters.source import format_source
+
+
+def mocked_links_requests(url: str, timeout: int | None = None) -> Mock:
+    mock_resp = Mock()
+    mock_resp.status_code = 200
+    mock_resp.text = {
+        "https://de.wikipedia.org/wiki/Golgi-Apparat": "<html><title>Golgi-Apparat – Wikipedia</title></html>",  # noqa: E501
+        "https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum": "<html><title>Endoplasmatisches Retikulum - DocCheck Flexikon</title></html>",  # noqa: E501
+    }[url]
+
+    return mock_resp
 
 
 @pytest.mark.parametrize(
@@ -273,6 +288,58 @@ def test_source_formatter(input: str, expected_output: str) -> None:
 def test_meditricks_formatter(input: str, expected_output: str) -> None:
     ret_1, _ = format_meditricks(input, False)
     ret_2, _ = format_meditricks(ret_1, False)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        (
+            """""",
+            """""",
+        ),
+        (
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a>""",
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">Golgi-Apparat – Wikipedia</a>""",  # noqa: E501
+        ),
+        (
+            """<a href="https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum">foo</a>""",
+            """<a href="https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum">Endoplasmatisches Retikulum – DocCheck Flexikon</a>""",  # noqa: E501
+        ),
+        (
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a><a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a>""",  # noqa: E501
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">Golgi-Apparat – Wikipedia</a><br>\n<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">Golgi-Apparat – Wikipedia</a>""",  # noqa: E501
+        ),
+    ),
+)
+@patch("anki_formatter.formatters.common.requests.get", side_effect=mocked_links_requests)
+def test_links_formatter(mock_get: Mock, input: str, expected_output: str) -> None:
+    ret_1, _ = format_links(input, False)
+    ret_2, _ = format_links(ret_1, False)
+
+    assert ret_1 == expected_output
+    assert ret_2 == expected_output
+
+
+@pytest.mark.parametrize(
+    ("input", "expected_output"),
+    (
+        (
+            """""",
+            """""",
+        ),
+        (
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a><a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a>""",  # noqa: E501
+            """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">Golgi-Apparat – Wikipedia</a><br><a href="https://de.wikipedia.org/wiki/Golgi-Apparat">Golgi-Apparat – Wikipedia</a>""",  # noqa: E501
+        ),
+    ),
+)
+@patch("anki_formatter.formatters.common.requests.get", side_effect=mocked_links_requests)
+def test_links_formatter_minimized(mock_get: Mock, input: str, expected_output: str) -> None:
+    ret_1, _ = format_links(input, True)
+    ret_2, _ = format_links(ret_1, True)
 
     assert ret_1 == expected_output
     assert ret_2 == expected_output
