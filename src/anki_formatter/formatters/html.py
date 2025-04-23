@@ -21,6 +21,7 @@ ALLOWED_TAGS = {
     "b",
     "i",
     "u",
+    "ins",
     "sub",
     "sup",
     "br",
@@ -91,8 +92,6 @@ def preprocess(text: str) -> str:
         tag.name = "b"
     for tag in soup.find_all("em"):
         tag.name = "i"
-    for tag in soup.find_all("ins"):
-        tag.name = "u"
 
     # merge redundant tags
     for tag in FORMATTING_TAGS:
