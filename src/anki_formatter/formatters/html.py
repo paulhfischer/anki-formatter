@@ -143,6 +143,10 @@ def postprocess(text: str) -> str:
     # remove br at end of li-items
     text = re.sub(r"(?:<br>\s*)+</li>", "</li>", text)
 
+    # combine formatting tags
+    for tag in FORMATTING_TAGS:
+        text = re.sub(f"</{tag}>( *)<{tag}>", r"\1", text)
+
     text = text.rstrip()
 
     return text

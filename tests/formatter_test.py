@@ -173,7 +173,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ),
         (
             """<b>foo</b> <b>bar</b>""",
-            """<b>foo</b> <b>bar</b>""",
+            """<b>foo bar</b>""",
         ),
         (
             """A <sub>B</sub> C""",
@@ -237,15 +237,15 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ),
         (
             """<b>foo</b>  <b>bar</b>""",
-            """<b>foo</b> <b>bar</b>""",
+            """<b>foo bar</b>""",
         ),
         (
             """<b>foo </b><b>bar</b>""",
-            """<b>foo</b> <b>bar</b>""",
+            """<b>foo bar</b>""",
         ),
         (
             """<b>foo </b>\n<b>bar</b>""",
-            """<b>foo</b> <b>bar</b>""",
+            """<b>foo bar</b>""",
         ),
         (
             """<b>foo</b>bar""",
@@ -401,7 +401,7 @@ def test_occlusion_formatter(input: str, expected_output: str) -> None:
         ),
         (
             """<u>foo<b>bas </b> <b>  bar</b></u>""",
-            """<u>foo<b>bas</b> <b>bar</b></u>""",
+            """<u>foo<b>bas bar</b></u>""",
         ),
         (
             """<u>foo<b>bas </b> <u>  bar</u></u>""",
