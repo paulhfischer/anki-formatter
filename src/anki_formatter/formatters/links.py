@@ -57,6 +57,9 @@ def format_links(value: str, minimized: bool = False) -> tuple[str, bool]:
         elif "gelbe-liste.de/produkte" in href:
             regex = r"^(.*) \| Gelbe Liste$"
             page_name = "Gelbe Liste"
+        elif "embryotox.de/arzneimittel" in href:
+            regex = r"^Embryotox - (.*)$"
+            page_name = "Embryotox"
         else:  # pragma: no cover
             showInfo(f"Unknown website: {href}")
 
