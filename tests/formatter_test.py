@@ -23,6 +23,8 @@ def mocked_links_requests(url: str, timeout: int | None = None) -> Mock:
     mock_resp.text = {
         "https://de.wikipedia.org/wiki/Golgi-Apparat": "<html><title>Golgi-Apparat – Wikipedia</title></html>",  # noqa: E501
         "https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum": "<html><title>Endoplasmatisches Retikulum - DocCheck Flexikon</title></html>",  # noqa: E501
+        "https://www.gelbe-liste.de/wirkstoffe/Aciclovir_231": "<html><title>Aciclovir - Anwendung, Wirkung, Nebenwirkungen | Gelbe Liste</title></html>",  # noqa: E501
+        "https://www.gelbe-liste.de/produkte/Metamizol-AbZ-500-mg-Tabletten_541825": "<html><title>Metamizol AbZ 500 mg Tabletten | Gelbe Liste</title></html>",  # noqa: E501
     }[url]
 
     return mock_resp
@@ -534,6 +536,14 @@ def test_meditricks_formatter(input: str, expected_output: str) -> None:
         (
             """<a href="https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum">foo</a>""",
             """<a href="https://flexikon.doccheck.com/de/Endoplasmatisches_Retikulum">Endoplasmatisches Retikulum – DocCheck Flexikon</a>""",  # noqa: E501
+        ),
+        (
+            """<a href="https://www.gelbe-liste.de/wirkstoffe/Aciclovir_231">foo</a>""",
+            """<a href="https://www.gelbe-liste.de/wirkstoffe/Aciclovir_231">Aciclovir – Gelbe Liste</a>""",  # noqa: E501
+        ),
+        (
+            """<a href="https://www.gelbe-liste.de/produkte/Metamizol-AbZ-500-mg-Tabletten_541825">foo</a>""",  # noqa: E501
+            """<a href="https://www.gelbe-liste.de/produkte/Metamizol-AbZ-500-mg-Tabletten_541825">Metamizol AbZ 500 mg Tabletten – Gelbe Liste</a>""",  # noqa: E501
         ),
         (
             """<a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a><a href="https://de.wikipedia.org/wiki/Golgi-Apparat">foo</a>""",  # noqa: E501

@@ -51,6 +51,12 @@ def format_links(value: str, minimized: bool = False) -> tuple[str, bool]:
         elif "flexikon.doccheck.com" in href:
             regex = r"^(.*) - DocCheck Flexikon$"
             page_name = "DocCheck Flexikon"
+        elif "gelbe-liste.de/wirkstoffe" in href:
+            regex = r"^(.*) - Anwendung, Wirkung, Nebenwirkungen \| Gelbe Liste$"
+            page_name = "Gelbe Liste"
+        elif "gelbe-liste.de/produkte" in href:
+            regex = r"^(.*) \| Gelbe Liste$"
+            page_name = "Gelbe Liste"
         else:  # pragma: no cover
             showInfo(f"Unknown website: {href}")
 
